@@ -48,6 +48,12 @@ class User:
 
     def __init__(self, username, firstname, surname, startingweight, weight, height, weight_history=None):
         self.user_dict = self.user_dict_create(username, firstname, surname, startingweight, weight, height)
+        self.username = username
+        self.firstname = firstname
+        self.surname = surname
+        self.starting_weight = startingweight
+        self.current_weight = current_weight
+        self.height = height
 
     def set_weight(self, weight):
         self.currentweight = weight
@@ -85,13 +91,27 @@ class User:
 
 def user_creation(user=None):
     if user == None:
-       username = str(input("Enter a valid username: "))
-       firstname = str(input("What is the user's first name?" ))
-       surname = str(input("What is the user's surname?" ))
-       startingweight = str(input("What is the user's starting weight? "))
-       currentweight = str(input("What is the user's current weight? "))
-       height = str(input("What is the user's height? "))
-       print("Are these the correct values? ")
+       username = input("Enter a valid username: ")
+       firstname = input("What is the user's first name?" )
+       surname = input("What is the user's surname?" )
+       startingweight = input("What is the user's starting weight? ")
+       currentweight = input("What is the user's current weight? ")
+       height = input("What is the user's height? ")
+
+       print(
+           f'Username: {username}'
+           f'Name: {firstname} {surname}'
+           f'Starting weight: {startingweight}'
+           f'Current weight: {currentweight}'
+           f'Height: {height}'
+       )
+       userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no.'))
+       if userinput == 'yes':
+           user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
+       elif userinput == 'no':
+           pass
+       else:
+
     else:
         user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
 
