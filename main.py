@@ -5,20 +5,21 @@ userid = sys.argv[1]
 
 BASE_DIR = pathlib.Path().resolve()
 
-if BASE_DIR.exists('database.txt'):
-    with open('database.txt'), 'r', encoding='utf-8') as dbread:
-        try:
-            if userid in dbread:
-                pass
-        except ValueError:
-            return f''
+def create_database():
+    try:
+        database = open(userdb.json, 'x', encoding='utf-8')
+        return database
+    except FileExistsError:
+        return
 
-else:
-    with open('database.txt'), 'w', encoding='utf-8') as dbcreate:
-        try:
-            dbcreate.write()
+def read_database():
+    try:
+        database = open(userdb.json, 'r', encoding='utf-8')
+        return database
+    except FileNotFoundError:
+        return
 
-def main():
+def edit_database(name):
     pass
 
 class User:
@@ -28,13 +29,12 @@ class User:
     their weight loss/gain.
     '''
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, firstname, surname, startingweight, weight, height):
         self.firstname = firstname
         self.surname =  surname
         self.startingweight = startingweight
         self.currentweight = weight
         self.height = height
-        self.weight_history = {}
 
     def set_weight(self, weight):
         self.currentweight = weight
@@ -44,23 +44,56 @@ class User:
 
     def __repr__(self):
         return f'{self.firstname} {self.surname}' \
-               f'{self.weight}' \
+               f'{self.currentweight}' \
                f'{self.height}'
+
+    def user_dict_create(self, firstname, surname, startingweight, currentweight, height):
+        return {
+            'firstname' : firstname,
+            'surname' : surname,
+            'starting weight' : startingweight,
+            'current weight' : currentweight,
+            'height' : height
+            'weight history' : {
+                date : startingweight
+            }
+        }
 
     def weight_entry(self, date, weight):
         '''Assigns a new weight entry to the dictionary with the date as the key'''
-        self.weight_history[date] = weight
+        self.user_dict['weight history'][date] = weight
 
     def weight_change(self):
         '''Averages all of the dictionary's entries and compares to starting weight and current weight'''
         total = 0
-        for values in self.weight_history.values():
+        for value in self.user_dict.values():
             total += value
 
 
 
-def user_creation():
-    pass
+def user_creation(user=None):
+    if user == None:
+       firstname = str(input("What is the user's first name?" ))
+       surname = str(input("What is the user's surname?" ))
+       startingweight = str(input("What is the user's starting weight? "))
+       currentweight = str(input("What is the user's current weight? "))
+       height = str(input("What is the user's height? "))
+       print("Are these the correct values? ")
+    else:
+
+
+def main():
+    if BASE_DIR.exists('userdb.json'):
+        dbread = read_database()
+        userid = str(input('Enter a user ID to query the database: '))
+        if userid in dbread:
+            json.load(userid, dbread)
+
+
+
+    else:
+        db = create_database()
+
 
 if __name__ == '__main__':
     main()
