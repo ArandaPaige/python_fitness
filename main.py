@@ -29,7 +29,7 @@ def edit_database(user):
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
             pass
     except KeyError:
-        return f'Username not found'
+        print('Incorrect username provided.')
 
 def append_database(user):
     '''Appends a new user to the database and closes the file'''
@@ -62,8 +62,8 @@ class User:
         return f'{self.surname}'
 
     def __repr__(self):
-        return f'{self.firstname} {self.surname}' \
-               f'{self.currentweight}' \
+        return f'{self.firstname} {self.surname}\n'
+               f'{self.currentweight}\n'
                f'{self.height}'
 
     def user_dict_create(self, username, firstname, surname, startingweight, currentweight, height):
@@ -99,13 +99,13 @@ def user_creation(user=None):
        height = input("What is the user's height? ")
 
        print(
-           f'Username: {username}'
-           f'Name: {firstname} {surname}'
-           f'Starting weight: {startingweight}'
-           f'Current weight: {currentweight}'
+           f'Username: {username}\n'
+           f'Name: {firstname} {surname}\n'
+           f'Starting weight: {startingweight}\n'
+           f'Current weight: {currentweight}\n'
            f'Height: {height}'
        )
-       userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no."))
+       userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no.'"))
        if userinput == 'yes':
            user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
        elif userinput == 'no':
@@ -126,7 +126,7 @@ def user_creation(user=None):
 def main():
     if BASE_DIR.exists('userdb.json'):
         dbread = read_database()
-        userid = str(input('Enter a username  to query the database: '))
+        userid = input('Enter a username  to query the database: ')
         try:
             if userid in dbread:
                 user = json.load(userid, dbread)
