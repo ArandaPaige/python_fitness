@@ -12,7 +12,8 @@ def create_database():
     try:
         database = open('userdb.json', 'x', encoding='utf-8')
         return database
-    except FileExistsError:
+    except FileExistsError as error:
+        print(error)
         return
 
 def read_database():
@@ -20,7 +21,8 @@ def read_database():
     try:
         database = open('userdb.json', 'r', encoding='utf-8')
         return database
-    except FileNotFoundError:
+    except FileNotFoundError as error:
+        print(error)
         return
 
 def edit_database(user):
@@ -28,8 +30,9 @@ def edit_database(user):
     try:
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
             pass
-    except KeyError:
-        print('Incorrect username provided.')
+    except KeyError as error:
+        print(error)
+        print('Please provide another username to query the database')
 
 def append_database(user):
     '''Appends a new user to the database and closes the file'''
@@ -102,6 +105,7 @@ def create_user():
     userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no.'"))
     if userinput == 'yes':
         user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
+        return user
     elif userinput == 'no':
         pass
     else:
@@ -117,6 +121,7 @@ def existing_user(user):
     weight_history = user['weight history']
 
     user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
+    return user
 
 def user_handler(user=None):
     if user == None:
@@ -142,13 +147,12 @@ def main():
         try:
             if user in dbread:
                 user = json.load(userid, dbread)
-        except KeyError:
+        except KeyError as error:
+            print(error)
             print('Incorrect username provided. Please provide another')
         user_obj = user_creation(user)
     else:
         db = create_database()
-
-
 
 if __name__ == '__main__':
     main()
