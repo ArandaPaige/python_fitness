@@ -52,7 +52,7 @@ class User:
         self.firstname = firstname
         self.surname = surname
         self.starting_weight = startingweight
-        self.current_weight = current_weight
+        self.current_weight = currentweight
         self.height = height
 
     def set_weight(self, weight):
@@ -105,7 +105,7 @@ def user_creation(user=None):
            f'Current weight: {currentweight}'
            f'Height: {height}'
        )
-       userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no.'))
+       userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no."))
        if userinput == 'yes':
            user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
        elif userinput == 'no':
@@ -113,8 +113,15 @@ def user_creation(user=None):
        else:
 
     else:
-        user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
+        username = user['username']
+        firstname = user['firstname']
+        surname = user['surname']
+        startingweight = user['starting weight']
+        currentweight = user['current weight']
+        height = user['height']
+        weight_history = user['weight history']
 
+        user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
 
 def main():
     if BASE_DIR.exists('userdb.json'):
