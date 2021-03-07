@@ -14,7 +14,7 @@ def create_database():
         return database
     except FileExistsError as error:
         print(error)
-        return
+
 
 def read_database():
     '''Opens the database for data retrieval. The file should be closed when finished'''
@@ -23,7 +23,7 @@ def read_database():
         return database
     except FileNotFoundError as error:
         print(error)
-        return
+
 
 def edit_database(user):
     '''Overwrites the database with new data and closes the file'''
@@ -39,8 +39,8 @@ def append_database(user):
     try:
         with open('userdb.json', 'a', encoding='utf-8') as dbedit:
             pass
-    except:
-        pass
+    except KeyError as keyerror:
+        print(keyerror)
 
 class User:
     '''
@@ -102,7 +102,7 @@ def create_user():
         f'Current weight: {currentweight}\n'
         f'Height: {height}'
     )
-    userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no.'"))
+    userinput = (input("Is this information correct? Type 'Yes' or 'no.'").lower()
     if userinput == 'yes':
         user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
         return user
@@ -133,7 +133,7 @@ def user_handler(user=None):
         return old_user
 
 def main():
-    selection = str.lower(input("Type 'New user' to begin user creation or 'existing user' to access an existing user."))
+    selection = input("Type 'New user' to begin user creation or 'existing user' to access an existing user.").lower()
     if selection == 'new user':
         pass
     elif selection == 'existing user':
