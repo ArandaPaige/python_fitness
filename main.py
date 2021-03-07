@@ -61,16 +61,16 @@ class User:
     def __repr__(self):
         return f'{self.user_dict}'
 
-    def user_dict_create(self, username, firstname, surname, startingweight, currentweight, height):
+    def user_dict_create(self, username, firstname, surname, startingweight, currentweight, height, date):
         return {
-            'username' : username,
-            'firstname' : firstname,
-            'surname' : surname,
-            'starting weight' : startingweight,
-            'current weight' : currentweight,
-            'height' : height,
-            'weight history' : {
-                date : startingweight
+            'username': username,
+            'firstname': firstname,
+            'surname': surname,
+            'starting weight': startingweight,
+            'current weight': currentweight,
+            'height': height,
+            'weight history': {
+                date: startingweight
             }
         }
 
@@ -83,14 +83,6 @@ class User:
         total = 0
         for value in self.user_dict.values():
             total += value
-
-def user_handler(user=None):
-    if user == None:
-        new_user = create_user()
-        return new_user
-
-    else:
-        old_user = existing_user(user)
 
 def create_user():
     username = input("Enter a valid username: ")
@@ -126,10 +118,19 @@ def existing_user(user):
 
     user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
 
+def user_handler(user=None):
+    if user == None:
+        new_user = create_user()
+        return new_user
+
+    else:
+        old_user = existing_user(user)
+        return old_user
+
 def main():
     if BASE_DIR.exists('userdb.json'):
         dbread = read_database()
-        userid = input('Enter a username  to query the database: ')
+        userid = input('Enter a username to query the database: ')
         try:
             if userid in dbread:
                 user = json.load(userid, dbread)
