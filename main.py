@@ -58,13 +58,8 @@ class User:
     def set_weight(self, weight):
         self.currentweight = weight
 
-    def __str__(self):
-        return f'{self.surname}'
-
     def __repr__(self):
-        return f'{self.firstname} {self.surname}\n'
-               f'{self.currentweight}\n'
-               f'{self.height}'
+        return f'{self.user_dict}'
 
     def user_dict_create(self, username, firstname, surname, startingweight, currentweight, height):
         return {
@@ -89,39 +84,47 @@ class User:
         for value in self.user_dict.values():
             total += value
 
-def user_creation(user=None):
+def user_handler(user=None):
     if user == None:
-       username = input("Enter a valid username: ")
-       firstname = input("What is the user's first name?" )
-       surname = input("What is the user's surname?" )
-       startingweight = input("What is the user's starting weight? ")
-       currentweight = input("What is the user's current weight? ")
-       height = input("What is the user's height? ")
-
-       print(
-           f'Username: {username}\n'
-           f'Name: {firstname} {surname}\n'
-           f'Starting weight: {startingweight}\n'
-           f'Current weight: {currentweight}\n'
-           f'Height: {height}'
-       )
-       userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no.'"))
-       if userinput == 'yes':
-           user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
-       elif userinput == 'no':
-           pass
-       else:
+        new_user = create_user()
+        return new_user
 
     else:
-        username = user['username']
-        firstname = user['firstname']
-        surname = user['surname']
-        startingweight = user['starting weight']
-        currentweight = user['current weight']
-        height = user['height']
-        weight_history = user['weight history']
+        old_user = existing_user(user)
 
+def create_user():
+    username = input("Enter a valid username: ")
+    firstname = input("What is the user's first name?")
+    surname = input("What is the user's surname?")
+    startingweight = input("What is the user's starting weight? ")
+    currentweight = input("What is the user's current weight? ")
+    height = input("What is the user's height? ")
+
+    print(
+        f'Username: {username}\n'
+        f'Name: {firstname} {surname}\n'
+        f'Starting weight: {startingweight}\n'
+        f'Current weight: {currentweight}\n'
+        f'Height: {height}'
+    )
+    userinput = str.lower(input("Is this information correct? Type 'Yes' or 'no.'"))
+    if userinput == 'yes':
         user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
+    elif userinput == 'no':
+        pass
+    else:
+        pass
+
+def existing_user(user):
+    username = user['username']
+    firstname = user['firstname']
+    surname = user['surname']
+    startingweight = user['starting weight']
+    currentweight = user['current weight']
+    height = user['height']
+    weight_history = user['weight history']
+
+    user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
 
 def main():
     if BASE_DIR.exists('userdb.json'):
