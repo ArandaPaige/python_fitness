@@ -105,7 +105,7 @@ def create_user():
     elif userinput == 'no':
         pass
     else:
-        pass
+        print("Please only enter 'Yes' or 'no.'")
 
 def existing_user(user):
     username = user['username']
@@ -128,17 +128,26 @@ def user_handler(user=None):
         return old_user
 
 def main():
+    selection = str.lower(input("Type 'New user' to begin user creation or 'existing user' to access an existing user."))
+    if selection == 'new user':
+        pass
+    elif selection == 'existing user':
+        pass
+    else:
+        pass
+
     if BASE_DIR.exists('userdb.json'):
         dbread = read_database()
-        userid = input('Enter a username to query the database: ')
+        user = input('Enter a username to query the database: ')
         try:
-            if userid in dbread:
+            if user in dbread:
                 user = json.load(userid, dbread)
         except KeyError:
-            pass
+            print('Incorrect username provided. Please provide another')
         user_obj = user_creation(user)
     else:
         db = create_database()
+
 
 
 if __name__ == '__main__':
