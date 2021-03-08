@@ -60,11 +60,11 @@ class User:
         self.current_weight = currentweight
         self.height = height
 
-    def set_weight(self, weight):
-        self.currentweight = weight
-
     def __repr__(self):
         return f'{self.user_dict}'
+
+    def set_weight(self, weight):
+        self.currentweight = weight
 
     def user_dict_create(self, username, firstname, surname, startingweight, currentweight, height, date):
         return {
@@ -162,29 +162,38 @@ def user_selection(database):
             print('Please enter a valid selection.')
 
 def user_menu(user):
-    print(
-        f'Username: {user.username}\n'
-        f'Name: {user.firstname} {user.surname}\n'
-        f'Starting weight: {user.startingweight}\n'
-        f'Current weight: {user.currentweight}\n'
-        f'Height: {user.height}'
-    )
-    print(
-        f'Menu Options: {}'
-    )
+    while True:
+        print(
+            f'Username: {user.username}\n'
+            f'Name: {user.firstname} {user.surname}\n'
+            f'Starting weight: {user.startingweight}\n'
+            f'Current weight: {user.currentweight}\n'
+            f'Height: {user.height}'
+        )
+        print(
+            f'Menu Options\n'
+            f'1. Update weight\n'
+            f'2. Update weight\n'
+            f'3. Update weight\n'
+            f'4. Update weight\n'
+        )
 
-    selection = input("What is your selection? Type 'Done' if you are finished.").lower()
-    if selection == "1":
-        pass
-    if selection == "2":
-        pass
-    if selection == "3":
-        pass
-    if selection == "4":
-        pass
-    elif selection == 'done':
-        break
+        selection = input("What is your selection? Type 'Done' if you are finished.").lower()
+        if selection == "1":
+            pass
+        if selection == "2":
+            pass
+        if selection == "3":
+            pass
+        if selection == "4":
+            pass
+        elif selection == 'done':
+            pass
+        else:
+            print("Please enter a valid selection.")
 
+def user_weight_change(user, weight):
+    pass
 
 def main():
     if BASE_DIR.exists('userdb.json') == False:
@@ -194,7 +203,6 @@ def main():
         dbread = read_database()
     user = user_selection(dbread)
     user_menu(user)
-
 
 if __name__ == '__main__':
     main()
