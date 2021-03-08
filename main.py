@@ -1,4 +1,4 @@
-import sys, json
+import sys, json, pathlib
 from pathlib import Path
 
 userid = sys.argv[1]
@@ -6,12 +6,11 @@ userid = sys.argv[1]
 BASE_DIR = pathlib.Path().resolve()
 
 def create_database():
-    '''
-    Exclusively creates and opens a new database if one does not exist. The file should be closed when finished
-    '''
+    '''Exclusively creates and opens a new database if one does not exist.'''
     try:
         database = open('userdb.json', 'x', encoding='utf-8')
-        return database
+        database.close()
+        return
     except FileExistsError as error:
         print(error)
 
@@ -30,17 +29,22 @@ def edit_database(user):
     try:
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
             pass
-    except KeyError as error:
-        print(error)
+    except KeyError as keyerror:
+        print(keyerror)
         print('Please provide another username to query the database')
+    except FileNotFoundError as fnferror:
+        print(fnferror)
 
 def append_database(user):
     '''Appends a new user to the database and closes the file'''
     try:
         with open('userdb.json', 'a', encoding='utf-8') as dbedit:
-            pass
+            dbedit.write()
+            json.dump(user, dbedit)
     except KeyError as keyerror:
         print(keyerror)
+    except FileNotFoundError as fnferror:
+        print(fnferror)
 
 class User:
     '''
@@ -49,8 +53,8 @@ class User:
     their weight loss/gain.
     '''
 
-    def __init__(self, username, firstname, surname, startingweight, weight, height, weight_history=None):
-        self.user_dict = self.user_dict_create(username, firstname, surname, startingweight, weight, height)
+    def __init__(self, username, firstname, surname, startingweight, currentweight, height, weight_history=None):
+        self.user_dict = self.user_dict_create(username, firstname, surname, startingweight, currentweight, height)
         self.username = username
         self.firstname = firstname
         self.surname = surname
@@ -96,20 +100,21 @@ def create_user():
     height = input("What is the user's height? ")
 
     print(
-        f'Username: {username}\n'
-        f'Name: {firstname} {surname}\n'
-        f'Starting weight: {startingweight}\n'
-        f'Current weight: {currentweight}\n'
-        f'Height: {height}'
+        f'1. Username: {username}\n'
+        f'2. Name: {firstname} {surname}\n'
+        f'3. Starting weight: {startingweight}\n'
+        f'4. Current weight: {currentweight}\n'
+        f'5. Height: {height}'
     )
-    userinput = (input("Is this information correct? Type 'Yes' or 'no.'").lower()
+
+    userinput = input("Is this information correct? Type 'Yes' or 'no.'").lower()
+
     if userinput == 'yes':
         user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
-        return user
     elif userinput == 'no':
-        pass
+        userchange = input("What would you like to change?")
     else:
-        print("Please only enter 'Yes' or 'no.'")
+        print("Please type only 'Yes' or 'no'")
 
 def existing_user(user):
     username = user['username']
@@ -132,27 +137,43 @@ def user_handler(user=None):
         old_user = existing_user(user)
         return old_user
 
-def main():
-    selection = input("Type 'New user' to begin user creation or 'existing user' to access an existing user.").lower()
-    if selection == 'new user':
-        pass
-    elif selection == 'existing user':
-        pass
-    else:
-        pass
+def user_selection(database):
+    '''
+    A selection menu for querying a new or existing user. A new user will be required to generate a unique user object.
+    Existing users will have their information loaded from the database provided.
+    :param database: accepts a database entity as a parameter for querying
+    :return: returns a User object
+    '''
+    while True:
+        selection = input("Type 'New user' to begin user creation or 'existing user' to access an existing user.").lower()
+        if selection == 'new user':
+            new_user = user_handler()
+            return new_user
+        elif selection == 'existing user':
+            username = input('Please type your username in to query the database: ')
+            try:
+                if username in database:
+                    user = json.load(user)
+                    old_user = user_handler(user)
+                    return old_user
+            except KeyError as error:
+                print(error)
+                print("That username was not in the database. Please make sure you typed it in correctly.")
+            old_user = existing_user()
+        else:
+            print('Please enter a valid selection.')
 
-    if BASE_DIR.exists('userdb.json'):
+def user_menu(user):
+    pass
+
+def main():
+    if BASE_DIR.exists('userdb.json') == False:
+        create_database()
         dbread = read_database()
-        user = input('Enter a username to query the database: ')
-        try:
-            if user in dbread:
-                user = json.load(userid, dbread)
-        except KeyError as error:
-            print(error)
-            print('Incorrect username provided. Please provide another')
-        user_obj = user_creation(user)
     else:
-        db = create_database()
+        dbread = read_database()
+    user = user_selection(dbread)
+
 
 if __name__ == '__main__':
     main()
