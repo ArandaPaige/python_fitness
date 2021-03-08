@@ -162,7 +162,29 @@ def user_selection(database):
             print('Please enter a valid selection.')
 
 def user_menu(user):
-    pass
+    print(
+        f'Username: {user.username}\n'
+        f'Name: {user.firstname} {user.surname}\n'
+        f'Starting weight: {user.startingweight}\n'
+        f'Current weight: {user.currentweight}\n'
+        f'Height: {user.height}'
+    )
+    print(
+        f'Menu Options: {}'
+    )
+
+    selection = input("What is your selection? Type 'Done' if you are finished.").lower()
+    if selection == "1":
+        pass
+    if selection == "2":
+        pass
+    if selection == "3":
+        pass
+    if selection == "4":
+        pass
+    elif selection == 'done':
+        break
+
 
 def main():
     if BASE_DIR.exists('userdb.json') == False:
@@ -171,6 +193,7 @@ def main():
     else:
         dbread = read_database()
     user = user_selection(dbread)
+    user_menu(user)
 
 
 if __name__ == '__main__':
