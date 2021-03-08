@@ -4,7 +4,7 @@ from pathlib import Path
 BASE_DIR = pathlib.Path().resolve()
 
 def create_database():
-    '''Exclusively creates and opens a new database if one does not exist.'''
+    '''Exclusively create a new database.'''
     try:
         database = open('userdb.json', 'x', encoding='utf-8')
         database.close()
@@ -14,7 +14,7 @@ def create_database():
 
 
 def read_database():
-    '''Opens the database for data retrieval. The file should be closed when finished'''
+    '''Open the database for data retrieval.'''
     try:
         database = open('userdb.json', 'r', encoding='utf-8')
         return database
@@ -23,7 +23,7 @@ def read_database():
 
 
 def edit_database(user):
-    '''Overwrites the database with new data and closes the file'''
+    '''Overwrite the database with new data.'''
     try:
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
             pass
@@ -34,7 +34,7 @@ def edit_database(user):
         print(fnferror)
 
 def append_database(user):
-    '''Appends a new user to the database and closes the file'''
+    '''Append a new user to the database.'''
     try:
         with open('userdb.json', 'a', encoding='utf-8') as dbedit:
             dbedit.write()
