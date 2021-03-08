@@ -3,6 +3,7 @@ from pathlib import Path
 
 BASE_DIR = pathlib.Path().resolve()
 
+
 def create_database():
     '''Exclusively create a new database.'''
     try:
@@ -33,6 +34,7 @@ def edit_database(user):
     except FileNotFoundError as fnferror:
         print(fnferror)
 
+
 def append_database(user):
     '''Append a new user to the database.'''
     try:
@@ -43,6 +45,7 @@ def append_database(user):
         print(keyerror)
     except FileNotFoundError as fnferror:
         print(fnferror)
+
 
 class User:
     '''
@@ -89,6 +92,7 @@ class User:
         for value in self.user_dict.values():
             total += value
 
+
 def create_user():
     username = input("Enter a valid username: ")
     firstname = input("What is the user's first name?")
@@ -115,6 +119,7 @@ def create_user():
     else:
         print("Please type only 'Yes' or 'no'")
 
+
 def existing_user(user):
     username = user['username']
     firstname = user['firstname']
@@ -127,6 +132,7 @@ def existing_user(user):
     user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
     return user
 
+
 def user_handler(user=None):
     if user == None:
         new_user = create_user()
@@ -136,6 +142,7 @@ def user_handler(user=None):
         old_user = existing_user(user)
         return old_user
 
+
 def user_selection(database):
     '''
     A selection menu for querying a new or existing user. A new user will be required to generate a unique user object.
@@ -144,7 +151,8 @@ def user_selection(database):
     :return: returns a User object
     '''
     while True:
-        selection = input("Type 'New user' to begin user creation or 'existing user' to access an existing user.").lower()
+        selection = input(
+            "Type 'New user' to begin user creation or 'existing user' to access an existing user.").lower()
         if selection == 'new user':
             user_obj = user_handler()
             return user_obj
@@ -161,6 +169,7 @@ def user_selection(database):
         else:
             print('Please enter a valid selection.')
 
+
 def user_menu(user):
     while True:
         print(
@@ -175,12 +184,19 @@ def user_menu(user):
             f'1. Update weight\n'
             f'2. Update weight\n'
             f'3. Update weight\n'
-            f'4. Update weight\n'
+            f'4. Return to user selection\n'
         )
 
         selection = input("What is your selection? Type 'Done' if you are finished.").lower()
-        if selection == "1":
-            pass
+        if selection == "1" or selection == "update weight":
+            weight = input("Please enter your new weight in imperial measurements.")
+            try:
+                float(weight)
+            except ValueError as error:
+                print(error)
+                print("Please input a valid number.")
+                continue
+            user_weight_change(user, weight)
         if selection == "2":
             pass
         if selection == "3":
@@ -192,8 +208,10 @@ def user_menu(user):
         else:
             print("Please enter a valid selection.")
 
+
 def user_weight_change(user, weight):
     pass
+
 
 def main():
     if BASE_DIR.exists('userdb.json') == False:
@@ -203,6 +221,7 @@ def main():
         dbread = read_database()
     user = user_selection(dbread)
     user_menu(user)
+
 
 if __name__ == '__main__':
     main()
