@@ -1,8 +1,6 @@
 import sys, json, pathlib
 from pathlib import Path
 
-userid = sys.argv[1]
-
 BASE_DIR = pathlib.Path().resolve()
 
 def create_database():
@@ -111,6 +109,7 @@ def create_user():
 
     if userinput == 'yes':
         user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
+        return user
     elif userinput == 'no':
         userchange = input("What would you like to change?")
     else:
@@ -147,19 +146,18 @@ def user_selection(database):
     while True:
         selection = input("Type 'New user' to begin user creation or 'existing user' to access an existing user.").lower()
         if selection == 'new user':
-            new_user = user_handler()
-            return new_user
+            user_obj = user_handler()
+            return user_obj
         elif selection == 'existing user':
             username = input('Please type your username in to query the database: ')
             try:
                 if username in database:
-                    user = json.load(user)
-                    old_user = user_handler(user)
-                    return old_user
+                    user = json.load(username)
+                    user_obj = user_handler(user)
+                    return user_obj
             except KeyError as error:
                 print(error)
                 print("That username was not in the database. Please make sure you typed it in correctly.")
-            old_user = existing_user()
         else:
             print('Please enter a valid selection.')
 
