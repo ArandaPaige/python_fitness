@@ -70,6 +70,11 @@ class User:
 
     def set_weight(self, weight):
         self.currentweight = weight
+        self.user_dict['current weight'] = weight
+
+    def set_startweight(self, weight):
+        self.startingweight = weight
+        self.user_dict['starting weight'] = weight
 
     def user_dict_create(self, username, firstname, surname, startingweight, currentweight, height, date):
         return {
@@ -141,6 +146,7 @@ def user_create_height():
         except ValueError as error:
             print(error)
             print("Please type a valid number.")
+            continue
 
 
 def create_user():
@@ -222,7 +228,7 @@ def user_selection(database):
             print('Please enter a valid selection.')
 
 
-def user_menu(user):
+def user_main_menu(user):
     while True:
         print(
             f'Username: {user.username}\n'
@@ -233,38 +239,43 @@ def user_menu(user):
         )
         print(
             f'Menu Options\n'
-            f'1. Update weight\n'
-            f'2. Update weight\n'
+            f'1. New Weight Entry\n'
+            f'2. Change Starting Weight\n'
             f'3. Update weight\n'
             f'4. Return to user selection\n'
         )
-
-        selection = input("What is your selection? Type 'Done' if you are finished.").lower()
+        selection = input("What is your selection? Type 'Quit' if you are finished.").lower()
 
         if selection == "1" or selection == "update weight":
-            weight = input("Please enter your new weight in imperial measurements.")
-            try:
-                float(weight)
-                user_weight_change(user, weight)
-            except ValueError as error:
-                print(error)
-                print("Please input a valid number.")
-
-
+            user_weight_change()
+            continue
         if selection == "2":
             pass
         if selection == "3":
             pass
         if selection == "4":
             pass
-        elif selection == 'done':
-            pass
+        elif selection == 'quit':
+            sys.exit()
         else:
             print("Please enter a valid selection.")
 
 
-def user_weight_change(user, weight):
-    pass
+def user_weight_change(user):
+    while True:
+        weight = input("Please enter your new weight in imperial measurements.")
+        try:
+            weight = float(weight)
+            break
+        except ValueError as error:
+            print(error)
+            print("Please input a valid number.")
+            continue
+    while True:
+        date = input("Input a custom date in MM/DD/YYYY format or leave blank if you want it automatically logged")
+        break
+    user.set_weight(weight)
+    user.user_dict['weight history'][date] = weight
 
 
 def main():
@@ -274,7 +285,7 @@ def main():
     else:
         dbread = read_database()
     user = user_selection(dbread)
-    user_menu(user)
+    user_main_menu(user)
 
 
 if __name__ == '__main__':
