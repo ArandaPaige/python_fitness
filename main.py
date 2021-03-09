@@ -1,7 +1,9 @@
 import sys, json, pathlib
+
 from pathlib import Path
 
 BASE_DIR = pathlib.Path().resolve()
+dbloc = BASE_DIR / 'userdb.json'
 
 
 def create_database():
@@ -93,31 +95,78 @@ class User:
             total += value
 
 
+def user_create_username():
+    while True:
+        username = input("Enter a valid username: ")
+        return username
+
+
+def user_create_names():
+    while True:
+        firstname = input("What is the user's first name: ")
+        surname = input("What is the user's surname: ")
+        return
+
+
+def user_create_startweight():
+    while True:
+        startingweight = input("What is the user's starting weight: ")
+        try:
+            startingweight = float(startingweight)
+            return startingweight
+        except TypeError as error:
+            print(error)
+            print("Please type a valid number.")
+
+
+def user_create_curweight():
+    while True:
+        currentweight = input("What is the user's current weight: ")
+        try:
+            currentweight = float(currentweight)
+            return currentweight
+        except TypeError as error:
+            print(error)
+            print("Please type a valid number.")
+
+
+def user_create_height():
+    while True:
+        height = input("What is the user's height: ")
+        try:
+            height = float(height)
+            return height
+        except TypeError as error:
+            print(error)
+            print("Please type a valid number.")
+
+
 def create_user():
-    username = input("Enter a valid username: ")
-    firstname = input("What is the user's first name?")
-    surname = input("What is the user's surname?")
-    startingweight = input("What is the user's starting weight? ")
-    currentweight = input("What is the user's current weight? ")
-    height = input("What is the user's height? ")
+    while True:
+        username = user_create_username()
+        name = user_create_names()
+        startingweight = user_create_startweight()
+        currentweight = user_create_curweight()
+        height = user_create_height()
 
-    print(
-        f'1. Username: {username}\n'
-        f'2. Name: {firstname} {surname}\n'
-        f'3. Starting weight: {startingweight}\n'
-        f'4. Current weight: {currentweight}\n'
-        f'5. Height: {height}'
-    )
 
-    userinput = input("Is this information correct? Type 'Yes' or 'no.'").lower()
+        print(
+            f'1. Username: {username}\n'
+            f'2. Name: {name}\n'
+            f'3. Starting weight: {startingweight}\n'
+            f'4. Current weight: {currentweight}\n'
+            f'5. Height: {height}'
+        )
 
-    if userinput == 'yes':
-        user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
-        return user
-    elif userinput == 'no':
-        userchange = input("What would you like to change?")
-    else:
-        print("Please type only 'Yes' or 'no'")
+        userinput = input("Is this information correct? Type 'Yes' or 'no.'\n").lower()
+
+        if userinput == 'yes':
+            user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
+            return user
+        elif userinput == 'no':
+            userchange = input("What would you like to change?")
+        else:
+            print("Please type only 'Yes' or 'no'")
 
 
 def existing_user(user):
@@ -152,7 +201,7 @@ def user_selection(database):
     '''
     while True:
         selection = input(
-            "Type 'New user' to begin user creation or 'existing user' to access an existing user.").lower()
+            "Type 'New user' to begin user creation or 'existing user' to access an existing user.\n").lower()
         if selection == 'new user':
             user_obj = user_handler()
             return user_obj
@@ -188,15 +237,16 @@ def user_menu(user):
         )
 
         selection = input("What is your selection? Type 'Done' if you are finished.").lower()
+
         if selection == "1" or selection == "update weight":
             weight = input("Please enter your new weight in imperial measurements.")
             try:
                 float(weight)
+                user_weight_change(user, weight)
             except ValueError as error:
                 print(error)
                 print("Please input a valid number.")
-                continue
-            user_weight_change(user, weight)
+
         if selection == "2":
             pass
         if selection == "3":
@@ -214,7 +264,7 @@ def user_weight_change(user, weight):
 
 
 def main():
-    if BASE_DIR.exists('userdb.json') == False:
+    if dbloc.exists() == False:
         create_database()
         dbread = read_database()
     else:
