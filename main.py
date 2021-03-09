@@ -3,7 +3,7 @@ import sys, json, pathlib
 from pathlib import Path
 
 BASE_DIR = pathlib.Path().resolve()
-dbloc = BASE_DIR / 'userdb.json'
+DATABASE = BASE_DIR / 'userdb.json'
 
 
 def create_database():
@@ -110,33 +110,35 @@ def user_create_names():
 
 def user_create_startweight():
     while True:
-        startingweight = input("What is the user's starting weight: ")
+        startingweight = input("What is the user's starting weight in lbs: ")
         try:
             startingweight = float(startingweight)
             return startingweight
-        except TypeError as error:
+        except ValueError as error:
             print(error)
             print("Please type a valid number.")
+            continue
 
 
 def user_create_curweight():
     while True:
-        currentweight = input("What is the user's current weight: ")
+        currentweight = input("What is the user's current weight in lbs: ")
         try:
             currentweight = float(currentweight)
             return currentweight
-        except TypeError as error:
+        except ValueError as error:
             print(error)
             print("Please type a valid number.")
+            continue
 
 
 def user_create_height():
     while True:
-        height = input("What is the user's height: ")
+        height = input("What is the user's height in inches: ")
         try:
             height = float(height)
             return height
-        except TypeError as error:
+        except ValueError as error:
             print(error)
             print("Please type a valid number.")
 
@@ -167,6 +169,7 @@ def create_user():
             userchange = input("What would you like to change?")
         else:
             print("Please type only 'Yes' or 'no'")
+            continue
 
 
 def existing_user(user):
@@ -247,6 +250,7 @@ def user_menu(user):
                 print(error)
                 print("Please input a valid number.")
 
+
         if selection == "2":
             pass
         if selection == "3":
@@ -264,7 +268,7 @@ def user_weight_change(user, weight):
 
 
 def main():
-    if dbloc.exists() == False:
+    if DATABASE.exists() == False:
         create_database()
         dbread = read_database()
     else:
