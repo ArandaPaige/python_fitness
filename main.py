@@ -260,6 +260,32 @@ def user_main_menu(user):
         else:
             print("Please enter a valid selection.")
 
+def user_date_entry():
+    date_list = []
+    while True:
+        date_unchecked = input("Input a custom date in MM/DD/YYYY format or leave blank if you want it automatically logged")
+        try:
+            date_split = date_unchecked.split('/')
+            continue
+        except ValueError as error:
+            print("Encountered invalid input. Please input a date in MM/DD/YYYY format.")
+        for date in date_split:
+            try:
+                int(date)
+                date_list.append(date)
+            except ValueError as error:
+                print("Non-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.")
+                continue
+        if date_list[0] <= 0 or date_list[0] > 12:
+            print('Invalid month entered. Please input a proper month in MM format.')
+            continue
+        if date_list[1] <= 0:
+            print('Invalid day entered. Please input a proper day in DD format.')
+            continue
+        if date_list[2] > curyear:
+            print("Please input a year equal to or before the current year. Future dates are not permissible.")
+            continue
+
 
 def user_weight_change(user):
     while True:
@@ -271,11 +297,10 @@ def user_weight_change(user):
             print(error)
             print("Please input a valid number.")
             continue
-    while True:
-        date = input("Input a custom date in MM/DD/YYYY format or leave blank if you want it automatically logged")
-        break
+    date = user_date_entry()
     user.set_weight(weight)
-    user.user_dict['weight history'][date] = weight
+    user.weight_entry(weight, date)
+    return
 
 
 def main():
