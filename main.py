@@ -1,4 +1,4 @@
-import sys, json, pathlib
+import sys, json, pathlib, datetime
 
 from pathlib import Path
 
@@ -172,7 +172,20 @@ def create_user():
             user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
             return user
         elif userinput == 'no':
-            userchange = input("What would you like to change?")
+            userchange = input("What would you like to change?").lower()
+            if userchange == '1' or userchange == 'username':
+                pass
+            elif userchange == '2' or userchange == 'name':
+                pass
+            elif userchange == '3' or userchange == 'starting weight':
+                pass
+            elif userchange == '4' or userchange == 'current weight':
+                pass
+            elif userchange == '5' or userchange == 'height':
+                pass
+            else:
+                print("Please type in a valid response.")
+                continue
         else:
             print("Please type only 'Yes' or 'no'")
             continue
@@ -247,7 +260,7 @@ def user_main_menu(user):
         selection = input("What is your selection? Type 'Quit' if you are finished.").lower()
 
         if selection == "1" or selection == "update weight":
-            user_weight_change()
+            user_weight_change(user)
             continue
         if selection == "2":
             pass
@@ -260,31 +273,35 @@ def user_main_menu(user):
         else:
             print("Please enter a valid selection.")
 
+
 def user_date_entry():
     date_list = []
     while True:
         date_unchecked = input("Input a custom date in MM/DD/YYYY format or leave blank if you want it automatically logged")
-        try:
-            date_split = date_unchecked.split('/')
-            continue
-        except ValueError as error:
-            print("Encountered invalid input. Please input a date in MM/DD/YYYY format.")
-        for date in date_split:
+        if len(date_unchecked) == 0:
+            date = TIMENOW
+            return date
+        else:
             try:
-                int(date)
-                date_list.append(date)
+                date_split = date_unchecked.split('/')
             except ValueError as error:
-                print("Non-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.")
+                print("Encountered invalid input. Please input a date in MM/DD/YYYY format.")
+            for date in date_split:
+                try:
+                    int(date)
+                    date_list.append(date)
+                except ValueError as error:
+                    print("Non-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.")
+                    continue
+            if date_list[0] <= 0 or date_list[0] > 12:
+                print('Invalid month entered. Please input a proper month in MM format.')
                 continue
-        if date_list[0] <= 0 or date_list[0] > 12:
-            print('Invalid month entered. Please input a proper month in MM format.')
-            continue
-        if date_list[1] <= 0:
-            print('Invalid day entered. Please input a proper day in DD format.')
-            continue
-        if date_list[2] > curyear:
-            print("Please input a year equal to or before the current year. Future dates are not permissible.")
-            continue
+            if date_list[1] <= 0:
+                print('Invalid day entered. Please input a proper day in DD format.')
+                continue
+            if date_list[2] > curyear:
+                print("Please input a year equal to or before the current year. Future dates are not permissible.")
+                continue
 
 
 def user_weight_change(user):
