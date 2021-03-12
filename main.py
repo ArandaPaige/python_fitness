@@ -1,6 +1,8 @@
-import sys, json, pathlib, datetime
+import sys
+import json
+import pathlib
+import datetime
 
-from pathlib import Path
 
 BASE_DIR = pathlib.Path().resolve()
 DATABASE = BASE_DIR / 'userdb.json'
@@ -57,11 +59,10 @@ class User:
     their weight loss/gain.
     '''
 
-    def __init__(self, username, firstname, surname, startingweight, currentweight, height, weight_history=None):
-        self.user_dict = self.user_dict_create(username, firstname, surname, startingweight, currentweight, height)
+    def __init__(self, username, name, startingweight, currentweight, height, weight_history=None):
+        self.user_dict = self.user_dict_create(username, name, startingweight, currentweight, height)
         self.username = username
-        self.firstname = firstname
-        self.surname = surname
+        self.name = name
         self.starting_weight = startingweight
         self.current_weight = currentweight
         self.height = height
@@ -69,19 +70,38 @@ class User:
     def __repr__(self):
         return f'{self.user_dict}'
 
-    def set_weight(self, weight):
-        self.currentweight = weight
+    def set_weight(self, weight=None):
+        if weight == None:
+            while True:
+                weight = input("What is the user's current weight in lbs: ")
+                try:
+                    weight = float(weight)
+                    break
+                except ValueError as error:
+                    print(error)
+                    print("Please type a valid number.")
+                    continue
+        self.current_weight = weight
         self.user_dict['current weight'] = weight
 
     def set_startweight(self, weight):
-        self.startingweight = weight
+        if weight == None:
+            while True:
+                weight = input("What is the user's starting weight in lbs: ")
+                try:
+                    weight = float(weight)
+                    break
+                except ValueError as error:
+                    print(error)
+                    print("Please type a valid number.")
+                    continue
+        self.starting_weight = weight
         self.user_dict['starting weight'] = weight
 
-    def user_dict_create(self, username, firstname, surname, startingweight, currentweight, height, date):
+    def user_dict_create(self, username, name, startingweight, currentweight, height, date):
         return {
             'username': username,
-            'firstname': firstname,
-            'surname': surname,
+            'name': name,
             'starting weight': startingweight,
             'current weight': currentweight,
             'height': height,
@@ -91,11 +111,11 @@ class User:
         }
 
     def weight_entry(self, date, weight):
-        '''Assigns a new weight entry to the dictionary with the date as the key'''
+        '''Assign a new weight entry to the dictionary with the date as the key'''
         self.user_dict['weight history'][date] = weight
 
     def weight_change(self):
-        '''Averages all of the dictionary's entries and compares to starting weight and current weight'''
+        '''Average all of the dictionary's entries and compares to starting weight and current weight'''
         total = 0
         for value in self.user_dict.values():
             total += value
@@ -171,7 +191,7 @@ def create_user():
             user = User(username, name, startingweight, currentweight, height, weight_history)
             return user
         elif userinput == 'no':
-            userchange = input("What would you like to change?").lower()
+            userchange = input("What would you like to change? ").lower()
             if userchange == '1' or userchange == 'username':
                 username = user_create_username()
                 continue
@@ -197,14 +217,13 @@ def create_user():
 
 def existing_user(user):
     username = user['username']
-    firstname = user['firstname']
-    surname = user['surname']
+    name = user['name']
     startingweight = user['starting weight']
     currentweight = user['current weight']
     height = user['height']
     weight_history = user['weight history']
 
-    user = User(username, firstname, surname, startingweight, currentweight, height, weight_history)
+    user = User(username, name, startingweight, currentweight, height, weight_history)
     return user
 
 
@@ -250,7 +269,7 @@ def user_main_menu(user):
     while True:
         print(
             f'Username: {user.username}\n'
-            f'Name: {user.firstname} {user.surname}\n'
+            f'Name: {user.name}\n'
             f'Starting weight: {user.startingweight}\n'
             f'Current weight: {user.currentweight}\n'
             f'Height: {user.height}'
@@ -308,22 +327,23 @@ def user_date_entry():
                 date_split = date_unchecked.split('/')
             except ValueError as error:
                 print("Encountered invalid input. Please input a date in MM/DD/YYYY format.")
-            for date in date_split:
-                try:
-                    date = int(date)
-                    date_list.append(date)
-                except ValueError as error:
-                    print("Non-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.")
-                    continue
-            if date_list[0] <= 0 or date_list[0] > 12:
-                print('Invalid month entered. Please input a proper month in MM format.')
                 continue
-            if date_list[1] <= 0:
-                print('Invalid day entered. Please input a proper day in DD format.')
+        for date in date_split:
+            try:
+                date = int(date)
+                date_list.append(date)
+            except ValueError as error:
+                print("Non-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.")
                 continue
-            if date_list[2] > curyear:
-                print("Please input a year equal to or before the current year. Future dates are not permissible.")
-                continue
+        if date_list[0] <= 0 or date_list[0] > 12:
+            print('Invalid month entered. Please input a proper month in MM format.')
+            continue
+        if date_list[1] <= 0 or date_list[1] > 31:
+            print('Invalid day entered. Please input a proper day in DD format.')
+            continue
+        if date_list[2] > curyear:
+            print("Please input a year equal to or before the current year. Future dates are not permissible.")
+            continue
 
 
 def main():
