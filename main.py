@@ -4,7 +4,8 @@ from pathlib import Path
 
 BASE_DIR = pathlib.Path().resolve()
 DATABASE = BASE_DIR / 'userdb.json'
-TIMENOW = datetime.date.today()
+DATETODAY = datetime.date.today()
+
 
 def create_database():
     '''Exclusively create a new database.'''
@@ -240,6 +241,7 @@ def user_selection(database):
             except KeyError as error:
                 print(error)
                 print("That username was not in the database. Please make sure you typed it in correctly.")
+                continue
         else:
             print('Please enter a valid selection.')
 
@@ -299,7 +301,7 @@ def user_date_entry():
         date_unchecked = input(
             "Input a custom date in MM/DD/YYYY format or leave blank if you want it automatically logged.")
         if len(date_unchecked) == 0:
-            date = TIMENOW
+            date = DATETODAY
             return date
         else:
             try:
