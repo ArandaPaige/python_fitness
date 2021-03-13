@@ -44,8 +44,9 @@ def append_database(user):
     '''Append a new user to the database.'''
     try:
         with open('userdb.json', 'a', encoding='utf-8') as dbedit:
-            dbedit.write()
-            json.dump(user, dbedit)
+            dbedit.write(f'Username: {user.username} - ')
+            json.dump(user.user_dict, dbedit)
+            dbedit.write(f'\n\n')
     except KeyError as keyerror:
         print(keyerror)
     except FileNotFoundError as fnferror:
@@ -98,16 +99,13 @@ class User:
         self.starting_weight = weight
         self.user_dict['starting weight'] = weight
 
-    def user_dict_create(self, username, name, startingweight, currentweight, height, date):
+    def user_dict_create(self, username, name, startingweight, currentweight, height):
         return {
             'username': username,
             'name': name,
             'starting weight': startingweight,
             'current weight': currentweight,
-            'height': height,
-            'weight history': {
-                date: startingweight
-            }
+            'height': height
         }
 
     def weight_entry(self, date, weight):
@@ -121,10 +119,14 @@ class User:
             total += value
 
 
-def user_create_username():
+def user_create_username(database):
     while True:
         username = input("Enter a valid username: ")
-        return username
+        if username in database:
+            print('\nUsername is already taken. Please enter another.\n')
+            continue
+        else:
+            return username
 
 
 def user_create_name():
@@ -169,8 +171,8 @@ def user_create_height():
             continue
 
 
-def create_user():
-    username = user_create_username()
+def create_user(database):
+    username = user_create_username(database)
     name = user_create_name()
     startingweight = user_create_startweight()
     currentweight = user_create_curweight()
@@ -189,11 +191,12 @@ def create_user():
 
         if userinput == 'yes':
             user = User(username, name, startingweight, currentweight, height)
+            append_database(user)
             return user
         elif userinput == 'no':
             userchange = input("What would you like to change? ").lower()
             if userchange == '1' or userchange == 'username':
-                username = user_create_username()
+                username = user_create_username(database)
                 continue
             elif userchange == '2' or userchange == 'name':
                 name = user_create_name()
@@ -227,16 +230,6 @@ def existing_user(user):
     return user
 
 
-def user_handler(user=None):
-    if user == None:
-        new_user = create_user()
-        return new_user
-
-    else:
-        old_user = existing_user(user)
-        return old_user
-
-
 def retrieve_user(database):
     while True:
         username = input('Please type your username in to query the database: ')
@@ -264,11 +257,11 @@ def user_selection(database):
         selection = input(
             "Type 'New user' to begin user creation or 'existing user' to access an existing user.\n").lower()
         if selection == 'new user':
-            user_obj = user_handler()
+            user_obj = create_user(database)
             return user_obj
         if selection == 'existing user':
             user = retrieve_user(database)
-            user_obj = user_handler(user)
+            user_obj = existing_user(user)
             return user_obj
         else:
             print('\nPlease enter a valid selection.\n')
@@ -279,8 +272,8 @@ def user_main_menu(user):
         print(
             f'Username: {user.username}\n'
             f'Name: {user.name}\n'
-            f'Starting weight: {user.startingweight}\n'
-            f'Current weight: {user.currentweight}\n'
+            f'Starting weight: {user.starting_weight}\n'
+            f'Current weight: {user.current_weight}\n'
             f'Height: {user.height}'
         )
         print(
