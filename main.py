@@ -141,7 +141,7 @@ def user_create_startweight():
             return startingweight
         except ValueError as error:
             print(error)
-            print("Please type a valid number.")
+            print("\nPlease type a valid number.\n")
             continue
 
 
@@ -153,7 +153,7 @@ def user_create_curweight():
             return currentweight
         except ValueError as error:
             print(error)
-            print("Please type a valid number.")
+            print("\nPlease type a valid number.\n")
             continue
 
 
@@ -165,7 +165,7 @@ def user_create_height():
             return height
         except ValueError as error:
             print(error)
-            print("Please type a valid number.")
+            print("\nPlease type a valid number.\n")
             continue
 
 
@@ -188,7 +188,7 @@ def create_user():
         userinput = input("Is this information correct? Type 'Yes' or 'no.'\n").lower()
 
         if userinput == 'yes':
-            user = User(username, name, startingweight, currentweight, height, weight_history)
+            user = User(username, name, startingweight, currentweight, height)
             return user
         elif userinput == 'no':
             userchange = input("What would you like to change? ").lower()
@@ -208,10 +208,10 @@ def create_user():
                 height = user_create_height()
                 continue
             else:
-                print("Please type in a valid response.")
+                print("\nPlease type in a valid response.\n")
                 continue
         else:
-            print("Please type only 'Yes' or 'no'")
+            print("\nPlease type only 'Yes' or 'no'\n")
             continue
 
 
@@ -237,6 +237,22 @@ def user_handler(user=None):
         return old_user
 
 
+def retrieve_user(database):
+    while True:
+        username = input('Please type your username in to query the database: ')
+        if username in database:
+            try:
+                user = json.load()
+                print(user)
+                return user
+            except:
+                e = sys.exc_info()[0]
+                print(e)
+                continue
+        else:
+            print(f'\n{username} was not found in the database. Please enter another username.\n')
+
+
 def user_selection(database):
     '''
     A selection menu for querying a new or existing user. A new user will be required to generate a unique user object.
@@ -250,19 +266,12 @@ def user_selection(database):
         if selection == 'new user':
             user_obj = user_handler()
             return user_obj
-        elif selection == 'existing user':
-            username = input('Please type your username in to query the database: ')
-            try:
-                if username in database:
-                    user = json.load(username)
-                    user_obj = user_handler(user)
-                    return user_obj
-            except KeyError as error:
-                print(error)
-                print("That username was not in the database. Please make sure you typed it in correctly.")
-                continue
+        if selection == 'existing user':
+            user = retrieve_user(database)
+            user_obj = user_handler(user)
+            return user_obj
         else:
-            print('Please enter a valid selection.')
+            print('\nPlease enter a valid selection.\n')
 
 
 def user_main_menu(user):
@@ -295,7 +304,7 @@ def user_main_menu(user):
         elif selection == 'quit':
             sys.exit()
         else:
-            print("Please enter a valid selection.")
+            print("\nPlease enter a valid selection.\n")
 
 
 def user_weight_change(user):
@@ -306,7 +315,7 @@ def user_weight_change(user):
             break
         except ValueError as error:
             print(error)
-            print("Please input a valid number.")
+            print("\nPlease input a valid number.\n")
             continue
     date = user_date_entry()
     user.set_weight(weight)
@@ -326,23 +335,23 @@ def user_date_entry():
             try:
                 date_split = date_unchecked.split('/')
             except ValueError as error:
-                print("Encountered invalid input. Please input a date in MM/DD/YYYY format.")
+                print("\nEncountered invalid input. Please input a date in MM/DD/YYYY format.\n")
                 continue
         for date in date_split:
             try:
                 date = int(date)
                 date_list.append(date)
             except ValueError as error:
-                print("Non-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.")
+                print("\nNon-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.\n")
                 continue
         if date_list[0] <= 0 or date_list[0] > 12:
-            print('Invalid month entered. Please input a proper month in MM format.')
+            print('\nInvalid month entered. Please input a proper month in MM format.\n')
             continue
         if date_list[1] <= 0 or date_list[1] > 31:
-            print('Invalid day entered. Please input a proper day in DD format.')
+            print('\nInvalid day entered. Please input a proper day in DD format.\n')
             continue
         if date_list[2] > curyear:
-            print("Please input a year equal to or before the current year. Future dates are not permissible.")
+            print("\nPlease input a year equal to or before the current year. Future dates are not permissible.\n")
             continue
 
 
