@@ -9,7 +9,10 @@ DATETODAY = str(datetime.date.today())
 
 
 def create_database():
-    '''Exclusively create a new database.'''
+    '''
+    Exclusively create a new database.
+    :return None:
+    '''
     try:
         database = open('userdb.json', 'x', encoding='utf-8')
         database.close()
@@ -19,7 +22,10 @@ def create_database():
 
 
 def read_database():
-    '''Open the database for data retrieval.'''
+    '''
+    Opens the database for data retrieval.
+    :return Object: readable collection of JSON user objects
+    '''
     try:
         database = open('userdb.json', 'r', encoding='utf-8')
         return database
@@ -46,7 +52,11 @@ def fetch_user():
 
 
 def edit_user(user):
-    '''Overwrite the database with new data.'''
+    '''
+    Overwrites user JSON with new data.
+    :param user: a User object
+    :return None:
+    '''
     try:
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
             for line in dbedit:
@@ -63,7 +73,11 @@ def edit_user(user):
 
 
 def append_user(user):
-    '''Append a new user to the database.'''
+    '''
+    Appends a new user to the database.
+    :param user: a User Object
+    :return None:
+    '''
     try:
         with open('userdb.json', 'a', encoding='utf-8') as dbedit:
             dbedit.write(f'{user.username}\n')
