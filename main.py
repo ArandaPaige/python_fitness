@@ -37,8 +37,9 @@ def fetch_user():
             username = input('Please type your username in to query the database: ')
             for line in dbread:
                 if line.startswith(username):
-                    user = json.load(next(dbread))
-                    return user
+                    user = json.loads(next(dbread))
+                    print(user)
+                    return user, username
             else:
                 print(f'\n{username} was not found in the database. Please enter another username.\n')
                 continue
@@ -146,12 +147,15 @@ class User:
                 'starting weight': startingweight,
                 'current weight': currentweight,
                 'height': height,
-                'weight_history': weight_history
+                'weight history': weight_history
             }
 
     def weight_entry(self, date, weight):
         '''Assign a new weight entry to the dictionary with the date as the key'''
-        self.user_dict['weight history'][date] = weight
+        try:
+            self.user_dict['weight history'][date] = weight
+        except KeyError as error:
+            print(error)
 
     def weight_change(self):
         '''Average all of the dictionary's entries and compares to starting weight and current weight'''
@@ -334,8 +338,8 @@ def create_user(database):
             continue
 
 
-def existing_user(user):
-    username = user['username']
+def existing_user(user, username):
+    username = username
     name = user['name']
     startingweight = user['starting weight']
     currentweight = user['current weight']
@@ -370,8 +374,8 @@ def user_selection(database):
             user_obj = create_user(database)
             return user_obj
         if selection == 'existing user':
-            user = fetch_user()
-            user_obj = existing_user(user)
+            user, username = fetch_user()
+            user_obj = existing_user(user, username)
             return user_obj
         else:
             print('\nPlease enter a valid selection.\n')
