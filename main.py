@@ -173,10 +173,17 @@ def database_username_check(username):
 
 
 def user_create_username():
+    print(
+        f'A valid username contains a minimum of 8 characters and a maximum of 30 characters.\n'
+        f'Usernames must not contain any spaces.\n'
+    )
     while True:
         username = input("Enter a valid username: ")
         if " " in username:
             print('No spaces are allowed in usernames. Please input another username.')
+            continue
+        if len(username) > 8:
+            print(f'{username} is too short. Please input a username that is equal to or more than 8 characters.')
             continue
         if len(username) > 30:
             print(f'{username} is too long. Please input a username that is equal to or less than 30 characters.')
@@ -233,16 +240,19 @@ def user_create_height():
 
 def new_user_prompt():
     print(
-        f'Welcome to the new user creation process!'
+        f'\n*****************************************\n'
+        f'Welcome to the new user creation process!\n'
+        f'*****************************************\n\n'
     )
-
-
-def create_user(database):
     username = user_create_username()
     name = user_create_name()
     startingweight = user_create_startweight()
     currentweight = user_create_curweight()
     height = user_create_height()
+    return username, name, startingweight, currentweight, height
+
+def create_user(database):
+    username, name, startingweight, currentweight, height = new_user_prompt()
 
     while True:
         print(
@@ -259,7 +269,6 @@ def create_user(database):
             user = User(username, name, startingweight, currentweight, height)
             user.weight_entry(DATETODAY, currentweight)
             append_database(user)
-            print(user)
             return user
         elif userinput == 'no':
             userchange = input("What would you like to change? ").lower()
