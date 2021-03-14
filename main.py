@@ -3,10 +3,9 @@ import json
 import pathlib
 import datetime
 
-
 BASE_DIR = pathlib.Path().resolve()
 DATABASE = BASE_DIR / 'userdb.json'
-DATETODAY = datetime.date.today()
+DATETODAY = str(datetime.date.today())
 
 
 def create_database():
@@ -28,11 +27,33 @@ def read_database():
         print(error)
 
 
+def fetch_user():
+    '''
+    Fetches a JSON string from the database based on the input provided.
+    :return: a deserialized object of the user fetched.
+    '''
+    with open('userdb.json', 'r', encoding='utf-8') as dbread:
+        while True:
+            username = input('Please type your username in to query the database: ')
+            for line in dbread:
+                if line.startswith(username):
+                    user = json.load()
+                    return user
+            else:
+                print(f'\n{username} was not found in the database. Please enter another username.\n')
+                continue
+
+
 def edit_database(user):
     '''Overwrite the database with new data.'''
     try:
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
-            pass
+            for line in dbedit:
+                if line.startswith(user.username):
+                    json.dump(user.user_dict, dbedit)
+                else:
+                    continue
+            return
     except KeyError as keyerror:
         print(keyerror)
         print('Please provide another username to query the database')
@@ -44,7 +65,7 @@ def append_database(user):
     '''Append a new user to the database.'''
     try:
         with open('userdb.json', 'a', encoding='utf-8') as dbedit:
-            dbedit.write(f'Username: {user.username} - ')
+            dbedit.write(f'{user.username}\n')
             json.dump(user.user_dict, dbedit)
             dbedit.write(f'\n\n')
     except KeyError as keyerror:
@@ -61,12 +82,8 @@ class User:
     '''
 
     def __init__(self, username, name, startingweight, currentweight, height, weight_history=None):
-        self.user_dict = self.user_dict_create(username, name, startingweight, currentweight, height)
         self.username = username
-        self.name = name
-        self.starting_weight = startingweight
-        self.current_weight = currentweight
-        self.height = height
+        self.user_dict = self.user_dict_create(name, startingweight, currentweight, height, weight_history)
 
     def __repr__(self):
         return f'{self.user_dict}'
@@ -86,6 +103,11 @@ class User:
         self.user_dict['current weight'] = weight
 
     def set_startweight(self, weight):
+        '''
+        Sets the user's starting weight to a new figure.
+        :param weight: the new starting weight entry
+        :return: the new starting weight
+        '''
         if weight == None:
             while True:
                 weight = input("What is the user's starting weight in lbs: ")
@@ -99,14 +121,34 @@ class User:
         self.starting_weight = weight
         self.user_dict['starting weight'] = weight
 
-    def user_dict_create(self, username, name, startingweight, currentweight, height):
-        return {
-            'username': username,
-            'name': name,
-            'starting weight': startingweight,
-            'current weight': currentweight,
-            'height': height
-        }
+    def user_dict_create(self, name, startingweight, currentweight, height, weight_history=None):
+        '''
+        Creates a dictionary with all of the user's personal statistics to be serialized as JSON.
+        :param name: User's full name
+        :param startingweight: The user's starting weight.
+        :param currentweight: The user's current weight.
+        :param height: The user's height.
+        :param weight_history: User's weight history is mapped by date.
+        :return: a dictionary containing the user's personal statistics.
+        '''
+        if weight_history == None:
+            return {
+                'name': name,
+                'starting weight': startingweight,
+                'current weight': currentweight,
+                'height': height,
+                'weight history': {
+                    DATETODAY: currentweight
+                }
+            }
+        else:
+            return {
+                'name': name,
+                'starting weight': startingweight,
+                'current weight': currentweight,
+                'height': height,
+                'weight_history': weight_history
+            }
 
     def weight_entry(self, date, weight):
         '''Assign a new weight entry to the dictionary with the date as the key'''
@@ -119,11 +161,29 @@ class User:
             total += value
 
 
-def user_create_username(database):
+def database_username_check(username):
+    with open('userdb.json', 'r', encoding='utf-8') as dbread:
+        for line in dbread:
+            if line.startswith(username):
+                print('True')
+                return True
+            else:
+                print('False')
+                return False
+
+
+def user_create_username():
     while True:
         username = input("Enter a valid username: ")
-        if username in database:
-            print('\nUsername is already taken. Please enter another.\n')
+        if " " in username:
+            print('No spaces are allowed in usernames. Please input another username.')
+            continue
+        if len(username) > 30:
+            print(f'{username} is too long. Please input a username that is equal to or less than 30 characters.')
+            continue
+        userbool = database_username_check(username)
+        if userbool == True:
+            print(f'{username} is taken. Please input another username.')
             continue
         else:
             return username
@@ -171,8 +231,14 @@ def user_create_height():
             continue
 
 
+def new_user_prompt():
+    print(
+        f'Welcome to the new user creation process!'
+    )
+
+
 def create_user(database):
-    username = user_create_username(database)
+    username = user_create_username()
     name = user_create_name()
     startingweight = user_create_startweight()
     currentweight = user_create_curweight()
@@ -191,12 +257,14 @@ def create_user(database):
 
         if userinput == 'yes':
             user = User(username, name, startingweight, currentweight, height)
+            user.weight_entry(DATETODAY, currentweight)
             append_database(user)
+            print(user)
             return user
         elif userinput == 'no':
             userchange = input("What would you like to change? ").lower()
             if userchange == '1' or userchange == 'username':
-                username = user_create_username(database)
+                username = user_create_username()
                 continue
             elif userchange == '2' or userchange == 'name':
                 name = user_create_name()
@@ -230,22 +298,6 @@ def existing_user(user):
     return user
 
 
-def retrieve_user(database):
-    while True:
-        username = input('Please type your username in to query the database: ')
-        if username in database:
-            try:
-                user = json.load()
-                print(user)
-                return user
-            except:
-                e = sys.exc_info()[0]
-                print(e)
-                continue
-        else:
-            print(f'\n{username} was not found in the database. Please enter another username.\n')
-
-
 def user_selection(database):
     '''
     A selection menu for querying a new or existing user. A new user will be required to generate a unique user object.
@@ -260,7 +312,7 @@ def user_selection(database):
             user_obj = create_user(database)
             return user_obj
         if selection == 'existing user':
-            user = retrieve_user(database)
+            user = fetch_user()
             user_obj = existing_user(user)
             return user_obj
         else:
@@ -271,10 +323,10 @@ def user_main_menu(user):
     while True:
         print(
             f'Username: {user.username}\n'
-            f'Name: {user.name}\n'
-            f'Starting weight: {user.starting_weight}\n'
-            f'Current weight: {user.current_weight}\n'
-            f'Height: {user.height}'
+            f"Name: {user.user_dict['name']}\n"
+            f"Starting weight: {user.user_dict['starting weight']}\n"
+            f"Current weight: {user.user_dict['current weight']}\n"
+            f"Height: {user.user_dict['height']}"
         )
         print(
             f'Menu Options\n'
