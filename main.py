@@ -33,23 +33,27 @@ def read_database():
         print(error)
 
 
-def fetch_user():
+def fetch_user(user=None):
     '''
     Fetches a JSON string from the database based on the input provided.
     :return Object: a deserialized object of the user fetched.
     '''
     with open('userdb.json', 'r', encoding='utf-8') as dbread:
-        while True:
-            username = input('Please type your username in to query the database: ')
+        if user != None:
+            while True:
+                username = input('Please type your username in to query the database: ')
+                for line in dbread:
+                    if line.startswith(username):
+                        user = json.loads(next(dbread))
+                        return user, username
+                else:
+                    print(f'\n{username} was not found in the database. Please enter another username.\n')
+                    continue
+        else:
             for line in dbread:
-                if line.startswith(username):
+                if line.startswith(user.username):
                     user = json.loads(next(dbread))
-                    print(user)
-                    return user, username
-            else:
-                print(f'\n{username} was not found in the database. Please enter another username.\n')
-                continue
-
+                    return user, user.username
 
 def edit_user(user):
     '''
@@ -61,7 +65,7 @@ def edit_user(user):
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
             for line in dbedit:
                 if line.startswith(user.username):
-                    json.dump(next(user.user_dict, dbedit))
+                    json.dump(user.user_dict, next(dbedit))
                 else:
                     continue
             return
@@ -170,6 +174,7 @@ class User:
             self.user_dict['weight history'][date] = weight
         except KeyError as error:
             print(error)
+        edit_user(self)
 
     def weight_change(self):
         '''Average all of the dictionary's entries and compares to starting weight and current weight'''
@@ -302,11 +307,10 @@ def new_user_prompt():
     return username, name, startingweight, currentweight, height
 
 
-def create_user(database):
+def create_user():
     '''
     Finalization of user creation with the user being prompted for changes, if necessary, and then the new User object
     is created from the user input given.
-    :param database:
     :return Object: a user object is created with all user data gathered
     '''
     username, name, startingweight, currentweight, height = new_user_prompt()
@@ -373,11 +377,10 @@ def selection_menu_print():
     )
 
 
-def user_selection(database):
+def user_selection():
     '''
     A selection menu for querying a new or existing user. A new user will be required to generate a unique user object.
-    Existing users will have their information loaded from the database provided.
-    :param database: accepts a database entity as a parameter for querying
+    Existing users will have their information loaded from the database.
     :return Object: returns a User object
     '''
     selection_menu_print()
@@ -385,7 +388,7 @@ def user_selection(database):
         selection = input(
             "Type 'New user' to begin user creation or 'existing user' to access an existing user.\n").lower()
         if selection == 'new user':
-            user_obj = create_user(database)
+            user_obj = create_user()
             return user_obj
         if selection == 'existing user':
             user, username = fetch_user()
@@ -424,9 +427,10 @@ def user_main_menu(user):
     :return None:
     '''
     while True:
+        user, username = fetch_user(user)
         main_menu_print(user)
         selection = input("What is your selection? Type 'Quit' if you are finished.").lower()
-        if selection == "1" or selection == "update weight":
+        if selection == "1" or selection == "new weight entry":
             new_weight_entry(user)
             continue
         if selection == "2":
@@ -448,7 +452,7 @@ def new_weight_entry(user):
     :return None:
     '''
     while True:
-        weight = input("Please enter your new weight in imperial measurements.")
+        weight = input("Please enter a new weight in imperial measurements: \n")
         try:
             weight = float(weight)
             break
@@ -457,7 +461,6 @@ def new_weight_entry(user):
             print("\nPlease input a valid number.\n")
             continue
     date = user_date_entry()
-    user.set_weight(weight)
     user.weight_entry(weight, date)
     return
 
@@ -466,7 +469,7 @@ def user_date_entry():
     date_list = []
     while True:
         date_unchecked = input(
-            "Input a custom date in MM/DD/YYYY format or leave blank if you want it automatically logged.")
+            "Input a custom date in YYYY/MM/DD format or leave blank if you want it automatically logged.")
         if len(date_unchecked) == 0:
             date = DATETODAY
             return date
@@ -474,22 +477,22 @@ def user_date_entry():
             try:
                 date_split = date_unchecked.split('/')
             except ValueError as error:
-                print("\nEncountered invalid input. Please input a date in MM/DD/YYYY format.\n")
+                print("\nEncountered invalid input. Please input a date in YYYY/MM/DD format.\n")
                 continue
         for date in date_split:
             try:
                 date = int(date)
                 date_list.append(date)
             except ValueError as error:
-                print("\nNon-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.\n")
+                print("\nNon-numerical input encountered. Please type in valid numerical input in YYYY/MM/DD format.\n")
                 continue
-        if date_list[0] <= 0 or date_list[0] > 12:
+        if date_list[1] <= 0 or date_list[0] > 12:
             print('\nInvalid month entered. Please input a proper month in MM format.\n')
             continue
-        if date_list[1] <= 0 or date_list[1] > 31:
+        if date_list[2] <= 0 or date_list[1] > 31:
             print('\nInvalid day entered. Please input a proper day in DD format.\n')
             continue
-        if date_list[2] > curyear:
+        if date_list[0] > curyear:
             print("\nPlease input a year equal to or before the current year. Future dates are not permissible.\n")
             continue
 
@@ -497,10 +500,7 @@ def user_date_entry():
 def main():
     if DATABASE.exists() == False:
         create_database()
-        dbread = read_database()
-    else:
-        dbread = read_database()
-    user = user_selection(dbread)
+    user = user_selection()
     user_main_menu(user)
 
 
