@@ -37,7 +37,7 @@ def fetch_user():
             username = input('Please type your username in to query the database: ')
             for line in dbread:
                 if line.startswith(username):
-                    user = json.load()
+                    user = json.load(next(dbread))
                     return user
             else:
                 print(f'\n{username} was not found in the database. Please enter another username.\n')
@@ -50,7 +50,7 @@ def edit_user(user):
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
             for line in dbedit:
                 if line.startswith(user.username):
-                    json.dump(user.user_dict, dbedit)
+                    json.dump(next(user.user_dict, dbedit))
                 else:
                     continue
             return
@@ -160,7 +160,7 @@ class User:
             total += value
 
 
-def database_username_check(username):
+def username_check(username):
     '''
     References database to prevent duplication of usernames.
     :param username: the input given by the user
@@ -199,7 +199,7 @@ def user_create_username():
         if len(username) > 30:
             print(f'{username} is too long. Please input a username that is equal to or less than 30 characters.')
             continue
-        userbool = database_username_check(username)
+        userbool = username_check(username)
         if userbool == True:
             print(f'{username} is taken. Please input another username.')
             continue
@@ -346,6 +346,15 @@ def existing_user(user):
     return user
 
 
+def selection_menu_print():
+    print(
+        f'\n*****************************************\n'
+        f"      BOOG'S BODACIOUS BODY CRUNCHER!\n"
+        f'             USER SELECTION\n'
+        f'*****************************************\n\n'
+    )
+
+
 def user_selection(database):
     '''
     A selection menu for querying a new or existing user. A new user will be required to generate a unique user object.
@@ -353,12 +362,7 @@ def user_selection(database):
     :param database: accepts a database entity as a parameter for querying
     :return Object: returns a User object
     '''
-    print(
-        f'\n*****************************************\n'
-        f"      BOOG'S BODACIOUS BODY CRUNCHER!\n"
-        f'             USER SELECTION\n'
-        f'*****************************************\n\n'
-    )
+    selection_menu_print()
     while True:
         selection = input(
             "Type 'New user' to begin user creation or 'existing user' to access an existing user.\n").lower()
@@ -373,6 +377,28 @@ def user_selection(database):
             print('\nPlease enter a valid selection.\n')
 
 
+def main_menu_print(user):
+    print(
+        f'\n*****************************************\n'
+        f"                MAIN MENU\n"
+        f'*****************************************\n\n'
+        f"           Username: {user.username}\n"
+        f"           Name: {user.user_dict['name']}\n"
+        f"           Starting weight: {user.user_dict['starting weight']}\n"
+        f"           Current weight: {user.user_dict['current weight']}\n"
+        f"           Height: {user.user_dict['height']}"
+    )
+    print(
+        f'\n*****************************************\n'
+        f"               USER OPTIONS\n"
+        f'*****************************************\n\n'
+        f'          1. New Weight Entry\n'
+        f'          2. Change Starting Weight\n'
+        f'          3. Update Weight\n'
+        f'          4. Return to User Selection\n'
+    )
+
+
 def user_main_menu(user):
     '''
     Provides user with access to various functions to alter personal statistics in the User object provided.
@@ -380,24 +406,10 @@ def user_main_menu(user):
     :return None:
     '''
     while True:
-        print(
-            f'Username: {user.username}\n'
-            f"Name: {user.user_dict['name']}\n"
-            f"Starting weight: {user.user_dict['starting weight']}\n"
-            f"Current weight: {user.user_dict['current weight']}\n"
-            f"Height: {user.user_dict['height']}"
-        )
-        print(
-            f'Menu Options\n'
-            f'1. New Weight Entry\n'
-            f'2. Change Starting Weight\n'
-            f'3. Update Weight\n'
-            f'4. Return to User Selection\n'
-        )
+        main_menu_print(user)
         selection = input("What is your selection? Type 'Quit' if you are finished.").lower()
-
         if selection == "1" or selection == "update weight":
-            user_weight_change(user)
+            new_weight_entry(user)
             continue
         if selection == "2":
             pass
@@ -411,7 +423,7 @@ def user_main_menu(user):
             print("\nPlease enter a valid selection.\n")
 
 
-def user_weight_change(user):
+def new_weight_entry(user):
     '''
     User input is used to alter User object to set a new weight and establish additional weight history.
     :param user: a User object
