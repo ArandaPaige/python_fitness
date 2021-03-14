@@ -169,10 +169,8 @@ def database_username_check(username):
     with open('userdb.json', 'r', encoding='utf-8') as dbread:
         for line in dbread:
             if line.startswith(username):
-                print('True')
                 return True
             else:
-                print('False')
                 return False
 
 
@@ -182,7 +180,11 @@ def user_create_username():
     And the username is checked to ensure it length parameters.
     :return String: the username of the user
     '''
+
     print(
+        f'\n*****************************************\n'
+        f'           Username Selection\n'
+        f'*****************************************\n\n'
         f'A valid username contains a minimum of 8 characters and a maximum of 30 characters.\n'
         f'Usernames must not contain any spaces.\n'
     )
@@ -270,7 +272,8 @@ def new_user_prompt():
     '''
     print(
         f'\n*****************************************\n'
-        f'Welcome to the new user creation process!\n'
+        f'               WELCOME!\n'
+        f'           NEW USER CREATION\n'
         f'*****************************************\n\n'
     )
     username = user_create_username()
@@ -350,6 +353,12 @@ def user_selection(database):
     :param database: accepts a database entity as a parameter for querying
     :return Object: returns a User object
     '''
+    print(
+        f'\n*****************************************\n'
+        f"      BOOG'S BODACIOUS BODY CRUNCHER!\n"
+        f'             USER SELECTION\n'
+        f'*****************************************\n\n'
+    )
     while True:
         selection = input(
             "Type 'New user' to begin user creation or 'existing user' to access an existing user.\n").lower()
