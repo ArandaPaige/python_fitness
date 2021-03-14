@@ -30,7 +30,7 @@ def read_database():
 def fetch_user():
     '''
     Fetches a JSON string from the database based on the input provided.
-    :return: a deserialized object of the user fetched.
+    :return Object: a deserialized object of the user fetched.
     '''
     with open('userdb.json', 'r', encoding='utf-8') as dbread:
         while True:
@@ -44,7 +44,7 @@ def fetch_user():
                 continue
 
 
-def edit_database(user):
+def edit_user(user):
     '''Overwrite the database with new data.'''
     try:
         with open('userdb.json', 'w', encoding='utf-8') as dbedit:
@@ -61,7 +61,7 @@ def edit_database(user):
         print(fnferror)
 
 
-def append_database(user):
+def append_user(user):
     '''Append a new user to the database.'''
     try:
         with open('userdb.json', 'a', encoding='utf-8') as dbedit:
@@ -106,7 +106,6 @@ class User:
         '''
         Sets the user's starting weight to a new figure.
         :param weight: the new starting weight entry
-        :return: the new starting weight
         '''
         if weight == None:
             while True:
@@ -129,7 +128,7 @@ class User:
         :param currentweight: The user's current weight.
         :param height: The user's height.
         :param weight_history: User's weight history is mapped by date.
-        :return: a dictionary containing the user's personal statistics.
+        :return Dictionary: a dictionary containing the user's personal statistics.
         '''
         if weight_history == None:
             return {
@@ -162,6 +161,11 @@ class User:
 
 
 def database_username_check(username):
+    '''
+    References database to prevent duplication of usernames.
+    :param username: the input given by the user
+    :return bool: True if username is found and false if not
+    '''
     with open('userdb.json', 'r', encoding='utf-8') as dbread:
         for line in dbread:
             if line.startswith(username):
@@ -173,6 +177,11 @@ def database_username_check(username):
 
 
 def user_create_username():
+    '''
+    Queries user for their username. Username is checked against the database to ensure no duplication.
+    And the username is checked to ensure it length parameters.
+    :return String: the username of the user
+    '''
     print(
         f'A valid username contains a minimum of 8 characters and a maximum of 30 characters.\n'
         f'Usernames must not contain any spaces.\n'
@@ -182,7 +191,7 @@ def user_create_username():
         if " " in username:
             print('No spaces are allowed in usernames. Please input another username.')
             continue
-        if len(username) > 8:
+        if len(username) < 8:
             print(f'{username} is too short. Please input a username that is equal to or more than 8 characters.')
             continue
         if len(username) > 30:
@@ -197,12 +206,20 @@ def user_create_username():
 
 
 def user_create_name():
+    '''
+    Queries user for their first and last names.
+    :return String: the user's first and last name
+    '''
     while True:
         name = input('What is your first and last name: ')
         return name
 
 
 def user_create_startweight():
+    '''
+    Queries user for their starting weight.
+    :return Integer: the user's starting weight
+    '''
     while True:
         startingweight = input("What is the user's starting weight in lbs: ")
         try:
@@ -215,6 +232,10 @@ def user_create_startweight():
 
 
 def user_create_curweight():
+    '''
+    Queries user for their current weight.
+    :return Integer: the user's current weight
+    '''
     while True:
         currentweight = input("What is the user's current weight in lbs: ")
         try:
@@ -227,6 +248,10 @@ def user_create_curweight():
 
 
 def user_create_height():
+    '''
+    Queries user for their height.
+    :return Integer: the user's height
+    '''
     while True:
         height = input("What is the user's height in inches: ")
         try:
@@ -239,6 +264,10 @@ def user_create_height():
 
 
 def new_user_prompt():
+    '''
+    Splash screen that welcomes the user and initiates the user creation process.
+    :return Tuple: packs a tuple with all the user's inputs
+    '''
     print(
         f'\n*****************************************\n'
         f'Welcome to the new user creation process!\n'
@@ -251,7 +280,14 @@ def new_user_prompt():
     height = user_create_height()
     return username, name, startingweight, currentweight, height
 
+
 def create_user(database):
+    '''
+    Finalization of user creation with the user being prompted for changes, if necessary, and then the new User object
+    is created from the user input given.
+    :param database:
+    :return Object: a user object is created with all user data gathered
+    '''
     username, name, startingweight, currentweight, height = new_user_prompt()
 
     while True:
@@ -268,7 +304,7 @@ def create_user(database):
         if userinput == 'yes':
             user = User(username, name, startingweight, currentweight, height)
             user.weight_entry(DATETODAY, currentweight)
-            append_database(user)
+            append_user(user)
             return user
         elif userinput == 'no':
             userchange = input("What would you like to change? ").lower()
@@ -312,7 +348,7 @@ def user_selection(database):
     A selection menu for querying a new or existing user. A new user will be required to generate a unique user object.
     Existing users will have their information loaded from the database provided.
     :param database: accepts a database entity as a parameter for querying
-    :return: returns a User object
+    :return Object: returns a User object
     '''
     while True:
         selection = input(
@@ -329,6 +365,11 @@ def user_selection(database):
 
 
 def user_main_menu(user):
+    '''
+    Provides user with access to various functions to alter personal statistics in the User object provided.
+    :param user: a User object
+    :return None:
+    '''
     while True:
         print(
             f'Username: {user.username}\n'
@@ -362,6 +403,11 @@ def user_main_menu(user):
 
 
 def user_weight_change(user):
+    '''
+    User input is used to alter User object to set a new weight and establish additional weight history.
+    :param user: a User object
+    :return None:
+    '''
     while True:
         weight = input("Please enter your new weight in imperial measurements.")
         try:
