@@ -39,7 +39,7 @@ def fetch_user(user=None):
     :return Object: a deserialized object of the user fetched.
     '''
     with open('userdb.json', 'r', encoding='utf-8') as dbread:
-        if user != None:
+        if user == None:
             while True:
                 username = input('Please type your username in to query the database: ')
                 for line in dbread:
@@ -50,10 +50,12 @@ def fetch_user(user=None):
                     print(f'\n{username} was not found in the database. Please enter another username.\n')
                     continue
         else:
+            username = user.username
             for line in dbread:
                 if line.startswith(user.username):
                     user = json.loads(next(dbread))
-                    return user, user.username
+                    return user, username
+
 
 def edit_user(user):
     '''
@@ -62,13 +64,13 @@ def edit_user(user):
     :return None:
     '''
     try:
-        with open('userdb.json', 'w', encoding='utf-8') as dbedit:
-            for line in dbedit:
+        with open('userdb.json', 'r+', encoding='utf-8') as dbread:
+            print(user.user_dict)
+            for line in dbread:
                 if line.startswith(user.username):
-                    json.dump(user.user_dict, next(dbedit))
-                else:
-                    continue
-            return
+                    next(dbread)
+                    json.dumps(user.user_dict)
+                    return
     except KeyError as keyerror:
         print(keyerror)
         print('Please provide another username to query the database')
@@ -121,7 +123,7 @@ class User:
         self.current_weight = weight
         self.user_dict['current weight'] = weight
 
-    def set_startweight(self, weight):
+    def set_startweight(self, weight=None):
         '''
         Sets the user's starting weight to a new figure.
         :param weight: the new starting weight entry
@@ -428,6 +430,7 @@ def user_main_menu(user):
     '''
     while True:
         user, username = fetch_user(user)
+        user = existing_user(user, username)
         main_menu_print(user)
         selection = input("What is your selection? Type 'Quit' if you are finished.").lower()
         if selection == "1" or selection == "new weight entry":
@@ -461,7 +464,7 @@ def new_weight_entry(user):
             print("\nPlease input a valid number.\n")
             continue
     date = user_date_entry()
-    user.weight_entry(weight, date)
+    user.weight_entry(date, weight)
     return
 
 
