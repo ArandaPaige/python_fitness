@@ -9,7 +9,10 @@ DATETODAY = str(datetime.date.today())
 
 
 def create_database():
-    '''Exclusively create a new database.'''
+    '''
+    Exclusively create a new database.
+    :return None:
+    '''
     try:
         database = open('userdb.json', 'x', encoding='utf-8')
         database.close()
@@ -19,7 +22,10 @@ def create_database():
 
 
 def read_database():
-    '''Open the database for data retrieval.'''
+    '''
+    Opens the database for data retrieval.
+    :return Object: readable collection of JSON user objects
+    '''
     try:
         database = open('userdb.json', 'r', encoding='utf-8')
         return database
@@ -27,33 +33,44 @@ def read_database():
         print(error)
 
 
-def fetch_user():
+def fetch_user(user=None):
     '''
     Fetches a JSON string from the database based on the input provided.
-    :return: a deserialized object of the user fetched.
+    :return Object: a deserialized object of the user fetched.
     '''
     with open('userdb.json', 'r', encoding='utf-8') as dbread:
-        while True:
-            username = input('Please type your username in to query the database: ')
-            for line in dbread:
-                if line.startswith(username):
-                    user = json.load()
-                    return user
-            else:
-                print(f'\n{username} was not found in the database. Please enter another username.\n')
-                continue
-
-
-def edit_database(user):
-    '''Overwrite the database with new data.'''
-    try:
-        with open('userdb.json', 'w', encoding='utf-8') as dbedit:
-            for line in dbedit:
-                if line.startswith(user.username):
-                    json.dump(user.user_dict, dbedit)
+        if user == None:
+            while True:
+                username = input('Please type your username in to query the database: ')
+                for line in dbread:
+                    if line.startswith(username):
+                        user = json.loads(next(dbread))
+                        return user, username
                 else:
+                    print(f'\n{username} was not found in the database. Please enter another username.\n')
                     continue
-            return
+        else:
+            username = user.username
+            for line in dbread:
+                if line.startswith(user.username):
+                    user = json.loads(next(dbread))
+                    return user, username
+
+
+def edit_user(user):
+    '''
+    Overwrites user JSON with new data.
+    :param user: a User object
+    :return None:
+    '''
+    try:
+        with open('userdb.json', 'r+', encoding='utf-8') as dbread:
+            print(user.user_dict)
+            for line in dbread:
+                if line.startswith(user.username):
+                    next(dbread)
+                    json.dumps(user.user_dict)
+                    return
     except KeyError as keyerror:
         print(keyerror)
         print('Please provide another username to query the database')
@@ -61,8 +78,12 @@ def edit_database(user):
         print(fnferror)
 
 
-def append_database(user):
-    '''Append a new user to the database.'''
+def append_user(user):
+    '''
+    Appends a new user to the database.
+    :param user: a User Object
+    :return None:
+    '''
     try:
         with open('userdb.json', 'a', encoding='utf-8') as dbedit:
             dbedit.write(f'{user.username}\n')
@@ -102,11 +123,10 @@ class User:
         self.current_weight = weight
         self.user_dict['current weight'] = weight
 
-    def set_startweight(self, weight):
+    def set_startweight(self, weight=None):
         '''
         Sets the user's starting weight to a new figure.
         :param weight: the new starting weight entry
-        :return: the new starting weight
         '''
         if weight == None:
             while True:
@@ -129,7 +149,7 @@ class User:
         :param currentweight: The user's current weight.
         :param height: The user's height.
         :param weight_history: User's weight history is mapped by date.
-        :return: a dictionary containing the user's personal statistics.
+        :return Dictionary: a dictionary containing the user's personal statistics.
         '''
         if weight_history == None:
             return {
@@ -147,12 +167,16 @@ class User:
                 'starting weight': startingweight,
                 'current weight': currentweight,
                 'height': height,
-                'weight_history': weight_history
+                'weight history': weight_history
             }
 
     def weight_entry(self, date, weight):
         '''Assign a new weight entry to the dictionary with the date as the key'''
-        self.user_dict['weight history'][date] = weight
+        try:
+            self.user_dict['weight history'][date] = weight
+        except KeyError as error:
+            print(error)
+        edit_user(self)
 
     def weight_change(self):
         '''Average all of the dictionary's entries and compares to starting weight and current weight'''
@@ -161,19 +185,31 @@ class User:
             total += value
 
 
-def database_username_check(username):
+def username_check(username):
+    '''
+    References database to prevent duplication of usernames.
+    :param username: the input given by the user
+    :return bool: True if username is found and false if not
+    '''
     with open('userdb.json', 'r', encoding='utf-8') as dbread:
         for line in dbread:
             if line.startswith(username):
-                print('True')
                 return True
             else:
-                print('False')
                 return False
 
 
 def user_create_username():
+    '''
+    Queries user for their username. Username is checked against the database to ensure no duplication.
+    And the username is checked to ensure it length parameters.
+    :return String: the username of the user
+    '''
+
     print(
+        f'\n*****************************************\n'
+        f'           Username Selection\n'
+        f'*****************************************\n\n'
         f'A valid username contains a minimum of 8 characters and a maximum of 30 characters.\n'
         f'Usernames must not contain any spaces.\n'
     )
@@ -182,13 +218,13 @@ def user_create_username():
         if " " in username:
             print('No spaces are allowed in usernames. Please input another username.')
             continue
-        if len(username) > 8:
+        if len(username) < 8:
             print(f'{username} is too short. Please input a username that is equal to or more than 8 characters.')
             continue
         if len(username) > 30:
             print(f'{username} is too long. Please input a username that is equal to or less than 30 characters.')
             continue
-        userbool = database_username_check(username)
+        userbool = username_check(username)
         if userbool == True:
             print(f'{username} is taken. Please input another username.')
             continue
@@ -197,12 +233,20 @@ def user_create_username():
 
 
 def user_create_name():
+    '''
+    Queries user for their first and last names.
+    :return String: the user's first and last name
+    '''
     while True:
         name = input('What is your first and last name: ')
         return name
 
 
 def user_create_startweight():
+    '''
+    Queries user for their starting weight.
+    :return Integer: the user's starting weight
+    '''
     while True:
         startingweight = input("What is the user's starting weight in lbs: ")
         try:
@@ -215,6 +259,10 @@ def user_create_startweight():
 
 
 def user_create_curweight():
+    '''
+    Queries user for their current weight.
+    :return Integer: the user's current weight
+    '''
     while True:
         currentweight = input("What is the user's current weight in lbs: ")
         try:
@@ -227,6 +275,10 @@ def user_create_curweight():
 
 
 def user_create_height():
+    '''
+    Queries user for their height.
+    :return Integer: the user's height
+    '''
     while True:
         height = input("What is the user's height in inches: ")
         try:
@@ -239,9 +291,14 @@ def user_create_height():
 
 
 def new_user_prompt():
+    '''
+    Splash screen that welcomes the user and initiates the user creation process.
+    :return Tuple: packs a tuple with all the user's inputs
+    '''
     print(
         f'\n*****************************************\n'
-        f'Welcome to the new user creation process!\n'
+        f'               WELCOME!\n'
+        f'           NEW USER CREATION\n'
         f'*****************************************\n\n'
     )
     username = user_create_username()
@@ -251,7 +308,13 @@ def new_user_prompt():
     height = user_create_height()
     return username, name, startingweight, currentweight, height
 
-def create_user(database):
+
+def create_user():
+    '''
+    Finalization of user creation with the user being prompted for changes, if necessary, and then the new User object
+    is created from the user input given.
+    :return Object: a user object is created with all user data gathered
+    '''
     username, name, startingweight, currentweight, height = new_user_prompt()
 
     while True:
@@ -268,7 +331,7 @@ def create_user(database):
         if userinput == 'yes':
             user = User(username, name, startingweight, currentweight, height)
             user.weight_entry(DATETODAY, currentweight)
-            append_database(user)
+            append_user(user)
             return user
         elif userinput == 'no':
             userchange = input("What would you like to change? ").lower()
@@ -295,8 +358,8 @@ def create_user(database):
             continue
 
 
-def existing_user(user):
-    username = user['username']
+def existing_user(user, username):
+    username = username
     name = user['name']
     startingweight = user['starting weight']
     currentweight = user['current weight']
@@ -307,47 +370,71 @@ def existing_user(user):
     return user
 
 
-def user_selection(database):
+def selection_menu_print():
+    print(
+        f'\n*****************************************\n'
+        f"      BOOG'S BODACIOUS BODY CRUNCHER!\n"
+        f'             USER SELECTION\n'
+        f'*****************************************\n\n'
+    )
+
+
+def user_selection():
     '''
     A selection menu for querying a new or existing user. A new user will be required to generate a unique user object.
-    Existing users will have their information loaded from the database provided.
-    :param database: accepts a database entity as a parameter for querying
-    :return: returns a User object
+    Existing users will have their information loaded from the database.
+    :return Object: returns a User object
     '''
+    selection_menu_print()
     while True:
         selection = input(
             "Type 'New user' to begin user creation or 'existing user' to access an existing user.\n").lower()
         if selection == 'new user':
-            user_obj = create_user(database)
+            user_obj = create_user()
             return user_obj
         if selection == 'existing user':
-            user = fetch_user()
-            user_obj = existing_user(user)
+            user, username = fetch_user()
+            user_obj = existing_user(user, username)
             return user_obj
         else:
             print('\nPlease enter a valid selection.\n')
 
 
-def user_main_menu(user):
-    while True:
-        print(
-            f'Username: {user.username}\n'
-            f"Name: {user.user_dict['name']}\n"
-            f"Starting weight: {user.user_dict['starting weight']}\n"
-            f"Current weight: {user.user_dict['current weight']}\n"
-            f"Height: {user.user_dict['height']}"
-        )
-        print(
-            f'Menu Options\n'
-            f'1. New Weight Entry\n'
-            f'2. Change Starting Weight\n'
-            f'3. Update Weight\n'
-            f'4. Return to User Selection\n'
-        )
-        selection = input("What is your selection? Type 'Quit' if you are finished.").lower()
+def main_menu_print(user):
+    print(
+        f'\n*****************************************\n'
+        f"                MAIN MENU\n"
+        f'*****************************************\n\n'
+        f"           Username: {user.username}\n"
+        f"           Name: {user.user_dict['name']}\n"
+        f"           Starting weight: {user.user_dict['starting weight']}\n"
+        f"           Current weight: {user.user_dict['current weight']}\n"
+        f"           Height: {user.user_dict['height']}"
+    )
+    print(
+        f'\n*****************************************\n'
+        f"               USER OPTIONS\n"
+        f'*****************************************\n\n'
+        f'          1. New Weight Entry\n'
+        f'          2. Change Starting Weight\n'
+        f'          3. Update Weight\n'
+        f'          4. Return to User Selection\n'
+    )
 
-        if selection == "1" or selection == "update weight":
-            user_weight_change(user)
+
+def user_main_menu(user):
+    '''
+    Provides user with access to various functions to alter personal statistics in the User object provided.
+    :param user: a User object
+    :return None:
+    '''
+    while True:
+        user, username = fetch_user(user)
+        user = existing_user(user, username)
+        main_menu_print(user)
+        selection = input("What is your selection? Type 'Quit' if you are finished.").lower()
+        if selection == "1" or selection == "new weight entry":
+            new_weight_entry(user)
             continue
         if selection == "2":
             pass
@@ -361,9 +448,14 @@ def user_main_menu(user):
             print("\nPlease enter a valid selection.\n")
 
 
-def user_weight_change(user):
+def new_weight_entry(user):
+    '''
+    User input is used to alter User object to set a new weight and establish additional weight history.
+    :param user: a User object
+    :return None:
+    '''
     while True:
-        weight = input("Please enter your new weight in imperial measurements.")
+        weight = input("Please enter a new weight in imperial measurements: \n")
         try:
             weight = float(weight)
             break
@@ -372,8 +464,7 @@ def user_weight_change(user):
             print("\nPlease input a valid number.\n")
             continue
     date = user_date_entry()
-    user.set_weight(weight)
-    user.weight_entry(weight, date)
+    user.weight_entry(date, weight)
     return
 
 
@@ -381,7 +472,7 @@ def user_date_entry():
     date_list = []
     while True:
         date_unchecked = input(
-            "Input a custom date in MM/DD/YYYY format or leave blank if you want it automatically logged.")
+            "Input a custom date in YYYY/MM/DD format or leave blank if you want it automatically logged.")
         if len(date_unchecked) == 0:
             date = DATETODAY
             return date
@@ -389,22 +480,22 @@ def user_date_entry():
             try:
                 date_split = date_unchecked.split('/')
             except ValueError as error:
-                print("\nEncountered invalid input. Please input a date in MM/DD/YYYY format.\n")
+                print("\nEncountered invalid input. Please input a date in YYYY/MM/DD format.\n")
                 continue
         for date in date_split:
             try:
                 date = int(date)
                 date_list.append(date)
             except ValueError as error:
-                print("\nNon-numerical input encountered. Please type in valid numerical input in MM/DD/YYYY format.\n")
+                print("\nNon-numerical input encountered. Please type in valid numerical input in YYYY/MM/DD format.\n")
                 continue
-        if date_list[0] <= 0 or date_list[0] > 12:
+        if date_list[1] <= 0 or date_list[0] > 12:
             print('\nInvalid month entered. Please input a proper month in MM format.\n')
             continue
-        if date_list[1] <= 0 or date_list[1] > 31:
+        if date_list[2] <= 0 or date_list[1] > 31:
             print('\nInvalid day entered. Please input a proper day in DD format.\n')
             continue
-        if date_list[2] > curyear:
+        if date_list[0] > curyear:
             print("\nPlease input a year equal to or before the current year. Future dates are not permissible.\n")
             continue
 
@@ -412,10 +503,7 @@ def user_date_entry():
 def main():
     if DATABASE.exists() == False:
         create_database()
-        dbread = read_database()
-    else:
-        dbread = read_database()
-    user = user_selection(dbread)
+    user = user_selection()
     user_main_menu(user)
 
 
