@@ -4,7 +4,9 @@ import pathlib
 import datetime
 
 BASE_DIR = pathlib.Path().resolve()
-DATABASE = BASE_DIR / 'userdb.json'
+DATABASE = 'userdb.json'
+DB_BACKUP = 'dbbackup.json'
+DATABASEPATH = BASE_DIR / DATABASE
 DATETODAY = str(datetime.date.today())
 
 
@@ -14,7 +16,7 @@ def create_database():
     :return None:
     '''
     try:
-        database = open('userdb.json', 'x', encoding='utf-8')
+        database = open(DATABASE, 'x', encoding='utf-8')
         database.close()
         return
     except FileExistsError as error:
@@ -27,7 +29,7 @@ def read_database():
     :return Object: readable collection of JSON user objects
     '''
     try:
-        database = open('userdb.json', 'r', encoding='utf-8')
+        database = open(DATABASE, 'r', encoding='utf-8')
         return database
     except FileNotFoundError as error:
         print(error)
@@ -38,7 +40,7 @@ def fetch_user(user=None):
     Fetches a JSON string from the database based on the input provided.
     :return Object: a deserialized object of the user fetched.
     '''
-    with open('userdb.json', 'r', encoding='utf-8') as dbread:
+    with open(DATABASE, 'r', encoding='utf-8') as dbread:
         if user == None:
             while True:
                 username = input('Please type your username in to query the database: ')
@@ -64,18 +66,19 @@ def edit_user(user):
     :return None:
     '''
     try:
-        with open('userdb.json', 'r+', encoding='utf-8') as dbread:
-            print(user.user_dict)
+        with open(DATABASE, 'r+', encoding='utf-8') as dbread:
             for line in dbread:
                 if line.startswith(user.username):
                     next(dbread)
-                    json.dumps(user.user_dict)
                     return
     except KeyError as keyerror:
         print(keyerror)
         print('Please provide another username to query the database')
     except FileNotFoundError as fnferror:
         print(fnferror)
+    except:
+        error = sys.exc_info()[1]
+        print(error)
 
 
 def append_user(user):
@@ -85,7 +88,7 @@ def append_user(user):
     :return None:
     '''
     try:
-        with open('userdb.json', 'a', encoding='utf-8') as dbedit:
+        with open(DATABASE, 'a', encoding='utf-8') as dbedit:
             dbedit.write(f'{user.username}\n')
             json.dump(user.user_dict, dbedit)
             dbedit.write(f'\n\n')
@@ -93,6 +96,15 @@ def append_user(user):
         print(keyerror)
     except FileNotFoundError as fnferror:
         print(fnferror)
+
+
+def backup_database():
+    try:
+        with open(DATABASE, 'r', encoding='utf-8') as dbread, open(DB_BACKUP, 'w', encoding='utf-8') as dbwrite:
+            data = dbread.readlines()
+            dbwrite.write(data)
+    except FileNotFoundError as error:
+        print(error)
 
 
 class User:
@@ -501,7 +513,7 @@ def user_date_entry():
 
 
 def main():
-    if DATABASE.exists() == False:
+    if DATABASEPATH.exists() == False:
         create_database()
     user = user_selection()
     user_main_menu(user)
