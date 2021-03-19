@@ -51,7 +51,6 @@ def fetch_user(user=None):
                         user = instantiate_user(user, username)
                         return user
                 print(f'\n{username} was not found in the database. Please enter another username.\n')
-                continue
         else:
             username = user.username
             for line in dbread:
@@ -182,7 +181,7 @@ class User:
                 'current weight': currentweight,
                 'height': height,
                 'weight history': {
-                    DATETODAY: currentweight
+                    str(DATETODAY): currentweight
                 }
             }
         else:
