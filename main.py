@@ -4,8 +4,10 @@ import pathlib
 import datetime
 
 BASE_DIR = pathlib.Path().resolve()
-DATABASE = BASE_DIR / 'userdb.json'
-DATETODAY = str(datetime.date.today())
+DATABASE = 'userdb.json'
+DB_BACKUP = 'dbbackup.json'
+DATABASEPATH = BASE_DIR / DATABASE
+DATETODAY = datetime.date.today()
 
 
 def create_database():
@@ -14,7 +16,7 @@ def create_database():
     :return None:
     '''
     try:
-        database = open('userdb.json', 'x', encoding='utf-8')
+        database = open(DATABASE, 'x', encoding='utf-8')
         database.close()
         return
     except FileExistsError as error:
@@ -27,7 +29,7 @@ def read_database():
     :return Object: readable collection of JSON user objects
     '''
     try:
-        database = open('userdb.json', 'r', encoding='utf-8')
+        database = open(DATABASE, 'r', encoding='utf-8')
         return database
     except FileNotFoundError as error:
         print(error)
@@ -38,23 +40,27 @@ def fetch_user(user=None):
     Fetches a JSON string from the database based on the input provided.
     :return Object: a deserialized object of the user fetched.
     '''
-    with open('userdb.json', 'r', encoding='utf-8') as dbread:
+    with open(DATABASE, 'r', encoding='utf-8') as dbread:
         if user == None:
             while True:
                 username = input('Please type your username in to query the database: ')
                 for line in dbread:
                     if line.startswith(username):
-                        user = json.loads(next(dbread))
-                        return user, username
-                else:
-                    print(f'\n{username} was not found in the database. Please enter another username.\n')
-                    continue
+                        line_list = line.split(':', 1)
+                        user = json.loads(line_list[1])
+                        user = instantiate_user(user, username)
+                        return user
+                    else:
+                        print(f'\n{username} was not found in the database. Please enter another username.\n')
+                        continue
         else:
             username = user.username
             for line in dbread:
                 if line.startswith(user.username):
-                    user = json.loads(next(dbread))
-                    return user, username
+                    line_list = line.split(':', 1)
+                    user = json.loads(line_list[1])
+                    user = instantiate_user(user, username)
+                    return user
 
 
 def edit_user(user):
@@ -64,18 +70,27 @@ def edit_user(user):
     :return None:
     '''
     try:
-        with open('userdb.json', 'r+', encoding='utf-8') as dbread:
-            print(user.user_dict)
+        with open(DATABASE, 'r', encoding='utf-8') as dbread:
+            user_list = []
             for line in dbread:
                 if line.startswith(user.username):
-                    next(dbread)
-                    json.dumps(user.user_dict)
-                    return
+                    continue
+                else:
+                    user_list.append(line)
+        with open(DATABASE, 'w', encoding='utf-8') as dbwrite:
+            dbwrite.writelines(user_list)
+            dbwrite.write(f'{user.username}:')
+            json.dump(user.user_dict, dbwrite)
+            dbwrite.write(f'\n')
     except KeyError as keyerror:
         print(keyerror)
         print('Please provide another username to query the database')
     except FileNotFoundError as fnferror:
         print(fnferror)
+    except:
+        error = sys.exc_info()[1]
+        print(error)
+    return
 
 
 def append_user(user):
@@ -85,14 +100,22 @@ def append_user(user):
     :return None:
     '''
     try:
-        with open('userdb.json', 'a', encoding='utf-8') as dbedit:
-            dbedit.write(f'{user.username}\n')
+        with open(DATABASE, 'a', encoding='utf-8') as dbedit:
+            dbedit.write(f'{user.username}:')
             json.dump(user.user_dict, dbedit)
-            dbedit.write(f'\n\n')
+            dbedit.write(f'\n')
     except KeyError as keyerror:
         print(keyerror)
     except FileNotFoundError as fnferror:
         print(fnferror)
+
+
+def backup_database():
+    try:
+        with open(DATABASE, 'r', encoding='utf-8') as dbread, open(DB_BACKUP, 'w', encoding='utf-8') as dbwrite:
+            pass
+    except FileNotFoundError as error:
+        print(error)
 
 
 class User:
@@ -122,6 +145,7 @@ class User:
                     continue
         self.current_weight = weight
         self.user_dict['current weight'] = weight
+        edit_user(self)
 
     def set_startweight(self, weight=None):
         '''
@@ -140,6 +164,7 @@ class User:
                     continue
         self.starting_weight = weight
         self.user_dict['starting weight'] = weight
+        edit_user(self)
 
     def user_dict_create(self, name, startingweight, currentweight, height, weight_history=None):
         '''
@@ -178,11 +203,20 @@ class User:
             print(error)
         edit_user(self)
 
-    def weight_change(self):
+    def display_weight_history(self):
         '''Average all of the dictionary's entries and compares to starting weight and current weight'''
-        total = 0
-        for value in self.user_dict.values():
-            total += value
+        for key, value in sorted(self.user_dict['weight history'].items()):
+            print(f"Date: {key} | Weight: {value}")
+
+    def display_weight_change(self):
+        '''Average all of the dictionary's entries and compares to starting weight and current weight'''
+        comparison_value = None
+        count = 0
+        for key, value in sorted(self.user_dict['weight history'].items()):
+            if comparison_value == None:
+                comparison_value = value
+
+            count += 1
 
 
 def username_check(username):
@@ -330,7 +364,6 @@ def create_user():
 
         if userinput == 'yes':
             user = User(username, name, startingweight, currentweight, height)
-            user.weight_entry(DATETODAY, currentweight)
             append_user(user)
             return user
         elif userinput == 'no':
@@ -358,7 +391,7 @@ def create_user():
             continue
 
 
-def existing_user(user, username):
+def instantiate_user(user, username):
     username = username
     name = user['name']
     startingweight = user['starting weight']
@@ -387,23 +420,29 @@ def user_selection():
     '''
     selection_menu_print()
     while True:
-        selection = input(
-            "Type 'New user' to begin user creation or 'existing user' to access an existing user.\n").lower()
+        print(
+            f"Type 'New user' to begin user creation or 'existing user' to access an existing user.\n"
+            f"You may also type 'Quit' to exit the program.\n"
+        )
+        selection = input().lower()
         if selection == 'new user':
-            user_obj = create_user()
-            return user_obj
+            user = create_user()
+            user_main_menu(user)
+            return
         if selection == 'existing user':
-            user, username = fetch_user()
-            user_obj = existing_user(user, username)
-            return user_obj
+            user = fetch_user()
+            user_main_menu(user)
+            return
+        elif selection == 'quit':
+            sys.exit()
         else:
             print('\nPlease enter a valid selection.\n')
 
 
-def main_menu_print(user):
+def user_stats_menu(user):
     print(
         f'\n*****************************************\n'
-        f"                MAIN MENU\n"
+        f"              USER STATISTICS\n"
         f'*****************************************\n\n'
         f"           Username: {user.username}\n"
         f"           Name: {user.user_dict['name']}\n"
@@ -411,13 +450,17 @@ def main_menu_print(user):
         f"           Current weight: {user.user_dict['current weight']}\n"
         f"           Height: {user.user_dict['height']}"
     )
+
+
+def main_menu_prompt():
+
     print(
         f'\n*****************************************\n'
-        f"               USER OPTIONS\n"
+        f"               MAIN MENU\n"
         f'*****************************************\n\n'
         f'          1. New Weight Entry\n'
-        f'          2. Change Starting Weight\n'
-        f'          3. Update Weight\n'
+        f'          2. Display Weight History\n'
+        f'          3. Display Weight Change\n'
         f'          4. Return to User Selection\n'
     )
 
@@ -429,19 +472,59 @@ def user_main_menu(user):
     :return None:
     '''
     while True:
-        user, username = fetch_user(user)
-        user = existing_user(user, username)
-        main_menu_print(user)
-        selection = input("What is your selection? Type 'Quit' if you are finished.").lower()
+        user = fetch_user(user)
+        user_stats_menu(user)
+        main_menu_prompt()
+        selection = input("What is your selection? Type 'Quit' if you are finished.\n").lower()
         if selection == "1" or selection == "new weight entry":
             new_weight_entry(user)
             continue
         if selection == "2":
-            pass
+            user.display_weight_history()
+            continue
         if selection == "3":
             pass
         if selection == "4":
-            pass
+            user_selection()
+            return
+        elif selection == 'quit':
+            sys.exit()
+        else:
+            print("\nPlease enter a valid selection.\n")
+
+
+def user_weight_options_prompt():
+    print(
+        f'\n*****************************************\n'
+        f"               USER OPTIONS\n"
+        f'*****************************************\n\n'
+        f'          1. New Weight Entry\n'
+        f'          2. Display Weight History\n'
+        f'          3. Display Weight Change\n'
+        f'          4. Update Current Weight\n'
+        f'          5. Return to Main Menu\n'
+    )
+
+
+def user_weight_options_menu(user):
+    while True:
+        user_weight_options_prompt()
+        selection = input("What is your selection? Type 'Quit' if you are finished.\n").lower()
+        if selection == "1" or selection == "new weight entry":
+            new_weight_entry(user)
+            continue
+        if selection == "2" or selection == 'display weight history':
+            user.display_weight_history()
+            continue
+        if selection == "3" or selection == 'display weight change':
+            user.display_weight_change()
+            continue
+        if selection == "4" or selection == 'update current weight':
+            user.set_weight()
+            continue
+        if selection == "5":
+            user_main_menu(user)
+            return
         elif selection == 'quit':
             sys.exit()
         else:
@@ -474,12 +557,13 @@ def user_date_entry():
         date_unchecked = input(
             "Input a custom date in YYYY/MM/DD format or leave blank if you want it automatically logged.")
         if len(date_unchecked) == 0:
-            date = DATETODAY
+            date = str(DATETODAY)
             return date
         else:
             try:
                 date_split = date_unchecked.split('/')
             except ValueError as error:
+                print(error)
                 print("\nEncountered invalid input. Please input a date in YYYY/MM/DD format.\n")
                 continue
         for date in date_split:
@@ -487,6 +571,7 @@ def user_date_entry():
                 date = int(date)
                 date_list.append(date)
             except ValueError as error:
+                print(error)
                 print("\nNon-numerical input encountered. Please type in valid numerical input in YYYY/MM/DD format.\n")
                 continue
         if date_list[1] <= 0 or date_list[0] > 12:
@@ -495,16 +580,15 @@ def user_date_entry():
         if date_list[2] <= 0 or date_list[1] > 31:
             print('\nInvalid day entered. Please input a proper day in DD format.\n')
             continue
-        if date_list[0] > curyear:
+        if date_list[0] > int(DATETODAY.year):
             print("\nPlease input a year equal to or before the current year. Future dates are not permissible.\n")
             continue
 
 
 def main():
-    if DATABASE.exists() == False:
+    if DATABASEPATH.exists() == False:
         create_database()
-    user = user_selection()
-    user_main_menu(user)
+    user_selection()
 
 
 if __name__ == '__main__':
