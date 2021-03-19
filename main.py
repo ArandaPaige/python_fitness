@@ -7,7 +7,7 @@ BASE_DIR = pathlib.Path().resolve()
 DATABASE = 'userdb.json'
 DB_BACKUP = 'dbbackup.json'
 DATABASEPATH = BASE_DIR / DATABASE
-DATETODAY = str(datetime.date.today())
+DATETODAY = datetime.date.today()
 
 
 def create_database():
@@ -47,7 +47,6 @@ def fetch_user(user=None):
                 for line in dbread:
                     if line.startswith(username):
                         line_list = line.split(':', 1)
-                        print(line_list[1])
                         user = json.loads(line_list[1])
                         user = instantiate_user(user, username)
                         return user
@@ -78,13 +77,11 @@ def edit_user(user):
                     continue
                 else:
                     user_list.append(line)
-            print(user_list)
         with open(DATABASE, 'w', encoding='utf-8') as dbwrite:
             dbwrite.writelines(user_list)
             dbwrite.write(f'{user.username}:')
             json.dump(user.user_dict, dbwrite)
             dbwrite.write(f'\n')
-
     except KeyError as keyerror:
         print(keyerror)
         print('Please provide another username to query the database')
@@ -94,6 +91,7 @@ def edit_user(user):
         error = sys.exc_info()[1]
         print(error)
     return
+
 
 def append_user(user):
     '''
@@ -147,6 +145,7 @@ class User:
                     continue
         self.current_weight = weight
         self.user_dict['current weight'] = weight
+        edit_user(self)
 
     def set_startweight(self, weight=None):
         '''
@@ -165,6 +164,7 @@ class User:
                     continue
         self.starting_weight = weight
         self.user_dict['starting weight'] = weight
+        edit_user(self)
 
     def user_dict_create(self, name, startingweight, currentweight, height, weight_history=None):
         '''
@@ -206,14 +206,17 @@ class User:
     def display_weight_history(self):
         '''Average all of the dictionary's entries and compares to starting weight and current weight'''
         for key, value in sorted(self.user_dict['weight history'].items()):
-            print(key, value)
+            print(f"Date: {key} | Weight: {value}")
 
     def display_weight_change(self):
         '''Average all of the dictionary's entries and compares to starting weight and current weight'''
-        total = 0
+        comparison_value = None
+        count = 0
         for key, value in sorted(self.user_dict['weight history'].items()):
-            total += value
+            if comparison_value == None:
+                comparison_value = value
 
+            count += 1
 
 
 def username_check(username):
@@ -436,10 +439,10 @@ def user_selection():
             print('\nPlease enter a valid selection.\n')
 
 
-def main_menu_user_stats(user):
+def user_stats_menu(user):
     print(
         f'\n*****************************************\n'
-        f"                MAIN MENU\n"
+        f"              USER STATISTICS\n"
         f'*****************************************\n\n'
         f"           Username: {user.username}\n"
         f"           Name: {user.user_dict['name']}\n"
@@ -447,9 +450,13 @@ def main_menu_user_stats(user):
         f"           Current weight: {user.user_dict['current weight']}\n"
         f"           Height: {user.user_dict['height']}"
     )
+
+
+def main_menu_prompt():
+
     print(
         f'\n*****************************************\n'
-        f"               USER OPTIONS\n"
+        f"               MAIN MENU\n"
         f'*****************************************\n\n'
         f'          1. New Weight Entry\n'
         f'          2. Display Weight History\n'
@@ -466,13 +473,15 @@ def user_main_menu(user):
     '''
     while True:
         user = fetch_user(user)
-        main_menu_user_stats(user)
+        user_stats_menu(user)
+        main_menu_prompt()
         selection = input("What is your selection? Type 'Quit' if you are finished.\n").lower()
         if selection == "1" or selection == "new weight entry":
             new_weight_entry(user)
             continue
         if selection == "2":
             user.display_weight_history()
+            continue
         if selection == "3":
             pass
         if selection == "4":
@@ -548,7 +557,7 @@ def user_date_entry():
         date_unchecked = input(
             "Input a custom date in YYYY/MM/DD format or leave blank if you want it automatically logged.")
         if len(date_unchecked) == 0:
-            date = DATETODAY
+            date = str(DATETODAY)
             return date
         else:
             try:
@@ -571,7 +580,7 @@ def user_date_entry():
         if date_list[2] <= 0 or date_list[1] > 31:
             print('\nInvalid day entered. Please input a proper day in DD format.\n')
             continue
-        if date_list[0] > curyear:
+        if date_list[0] > int(DATETODAY.year):
             print("\nPlease input a year equal to or before the current year. Future dates are not permissible.\n")
             continue
 
