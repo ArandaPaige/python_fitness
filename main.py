@@ -50,9 +50,8 @@ def fetch_user(user=None):
                         user = json.loads(line_list[1])
                         user = instantiate_user(user, username)
                         return user
-                    else:
-                        print(f'\n{username} was not found in the database. Please enter another username.\n')
-                        continue
+                print(f'\n{username} was not found in the database. Please enter another username.\n')
+                continue
         else:
             username = user.username
             for line in dbread:
@@ -483,7 +482,7 @@ def user_main_menu(user):
             user.display_weight_history()
             continue
         if selection == "3":
-            pass
+            continue
         if selection == "4":
             user_selection()
             return
