@@ -45,7 +45,7 @@ def fetch_user(user=None):
             while True:
                 username = input('Please type your username in to query the database: ')
                 for line in dbread:
-                    if line.startswith(username):
+                    if line[:len(username)] == username:
                         line_list = line.split(':', 1)
                         user = json.loads(line_list[1])
                         user = instantiate_user(user, username)
@@ -54,7 +54,7 @@ def fetch_user(user=None):
         else:
             username = user.username
             for line in dbread:
-                if line.startswith(user.username):
+                if line[:len(username)] == username:
                     line_list = line.split(':', 1)
                     user = json.loads(line_list[1])
                     user = instantiate_user(user, username)
@@ -71,7 +71,7 @@ def edit_user(user):
         with open(DATABASE, 'r', encoding='utf-8') as dbread:
             user_list = []
             for line in dbread:
-                if line.startswith(user.username):
+                if line[:len(user.username)] == user.username:
                     continue
                 else:
                     user_list.append(line)
